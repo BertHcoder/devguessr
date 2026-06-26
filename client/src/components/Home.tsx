@@ -54,7 +54,7 @@ export default function Home({ connected, onJoined }: Props) {
         </h1>
         <p className="hero-sub">
           A GeoGuessr for engineers. Spot the <strong>language</strong>, name the{' '}
-          <strong>framework</strong>, and unmask the <strong>company</strong> — faster than your
+          <strong>framework</strong>, and unmask the <strong>company</strong> faster than your
           friends.
         </p>
         <div className="hero-pills">

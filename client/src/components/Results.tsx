@@ -95,8 +95,11 @@ export default function Results({ room, playerId, leaderboard, onLeave }: Props)
 }
 
 function avatarColor(name: string): string {
+  const palette = [
+    '#ff6a3d', '#f5a623', '#27cdb0', '#ff6f9d', '#45cf8a',
+    '#ff9d3c', '#e8c14b', '#f2584e', '#2f9e8f', '#d98344',
+  ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  const hue = Math.abs(hash) % 360;
-  return `hsl(${hue}, 65%, 45%)`;
+  return palette[Math.abs(hash) % palette.length];
 }

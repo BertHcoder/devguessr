@@ -109,7 +109,7 @@ export default function Game({ room, playerId, round, result }: Props) {
                 borderRadius: 14,
                 padding: '1.25rem 1.5rem',
                 fontSize: '0.95rem',
-                background: '#0c1322',
+                background: '#1c160f',
                 maxHeight: '46vh',
               }}
               wrapLongLines
@@ -120,7 +120,7 @@ export default function Game({ room, playerId, round, result }: Props) {
             <LogoStage
               slug={question.slug ?? ''}
               revealed={!!result}
-              color={question.color ?? '#e8eefc'}
+              color={question.color ?? '#f6ecdd'}
             />
           )}
         </div>
@@ -191,7 +191,7 @@ export default function Game({ room, playerId, round, result }: Props) {
 function LogoStage({ slug, revealed, color }: { slug: string; revealed: boolean; color: string }) {
   // During play the logo is shown as a neutral silhouette; the real brand
   // color is revealed once the round ends.
-  const hex = (revealed ? color : '#aeb9d6').replace('#', '');
+  const hex = (revealed ? color : '#c2b4a0').replace('#', '');
   const src = `https://cdn.simpleicons.org/${slug}/${hex}`;
   return (
     <div className={`logo-stage ${revealed ? 'revealed' : ''}`}>
