@@ -89,6 +89,8 @@ export interface Room {
   players: Map<string, Player>;
   hostId: string;
   questions: Question[];
+  /** IDs of questions served in recent games, newest first, so the next game can avoid repeats. */
+  recentQuestionIds: string[];
   roundIndex: number;
   /** Timestamp (ms) when the current round ends. */
   endsAt: number;

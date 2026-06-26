@@ -56,13 +56,25 @@ function buildBugQuestion(raw: RawQuestion): Question {
   return { ...raw, answer, options };
 }
 
-/** Pick `count` questions limited to the selected categories. */
-function pickQuestions(count: number, categories: Category[]): Question[] {
+/**
+ * Pick `count` questions limited to the selected categories.
+ *
+ * To keep consecutive games feeling fresh, questions served in recent games
+ * (tracked via `recentIds`) are de-prioritized: unseen questions are drawn
+ * first, and only once they run out do recently-used ones come back. Within a
+ * single game the result is always unique (we slice from a shuffled pool).
+ */
+function pickQuestions(
+  count: number,
+  categories: Category[],
+  recentIds: Set<string> = new Set(),
+): Question[] {
   const allowed = categories.length ? categories : DEFAULT_SETTINGS.categories;
   const pool = ALL_QUESTIONS.filter((q) => allowed.includes(q.category));
-  return shuffle(pool)
-    .slice(0, Math.min(count, pool.length))
-    .map(buildQuestion);
+  const fresh = shuffle(pool.filter((q) => !recentIds.has(q.id)));
+  const seen = shuffle(pool.filter((q) => recentIds.has(q.id)));
+  // Prefer questions that haven't appeared recently, then fall back to the rest.
+  return [...fresh, ...seen].slice(0, Math.min(count, pool.length)).map(buildQuestion);
 }
 
 export function createRoom(): Room {
@@ -76,6 +88,7 @@ export function createRoom(): Room {
     players: new Map(),
     hostId: '',
     questions: [],
+    recentQuestionIds: [],
     roundIndex: -1,
     endsAt: 0,
     timer: null,
@@ -184,7 +197,15 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 export function startGame(room: Room): void {
-  room.questions = pickQuestions(room.settings.rounds, room.settings.categories);
+  room.questions = pickQuestions(
+    room.settings.rounds,
+    room.settings.categories,
+    new Set(room.recentQuestionIds),
+  );
+  // Remember what we just served so the next game avoids these first. Keep a
+  // bounded history so the pool eventually cycles back instead of starving.
+  const servedIds = room.questions.map((q) => q.id);
+  room.recentQuestionIds = [...servedIds, ...room.recentQuestionIds].slice(0, 40);
   room.roundIndex = -1;
   for (const p of room.players.values()) {
     p.score = 0;
