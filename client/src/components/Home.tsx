@@ -62,6 +62,7 @@ export default function Home({ connected, onJoined }: Props) {
           <span className="pill pill-language">{'</> language'}</span>
           <span className="pill pill-framework">⚙ framework</span>
           <span className="pill pill-company">★ company</span>
+          <span className="pill pill-bug">🐛 spot the bug</span>
         </div>
       </div>
 

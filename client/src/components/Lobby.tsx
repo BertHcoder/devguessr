@@ -131,7 +131,7 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
               {room.settings.progressiveReveal ? 'On' : 'Off'}
             </button>
             <span className="setting-hint">
-              Snippets &amp; logos start obscured and sharpen as the timer runs — guess early for more points.
+              Snippets &amp; logos start obscured and sharpen as the timer runs guess early for more points.
             </span>
           </div>
         </div>
