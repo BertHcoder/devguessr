@@ -40,6 +40,15 @@ export interface PublicQuestion {
   color?: string;
 }
 
+/** Optional, player-customizable profile sent when joining and editable in the lobby. */
+export interface PlayerProfile {
+  name: string;
+  avatar: string;
+  favTech: string;
+  color: string;
+  tagline: string;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -53,6 +62,14 @@ export interface Player {
   lastPoints: number;
   connected: boolean;
   isHost: boolean;
+  /** Emoji avatar, or '' to fall back to the name initial. */
+  avatar: string;
+  /** Free-text favourite technology. */
+  favTech: string;
+  /** Validated hex accent colour, or '' for the auto colour. */
+  color: string;
+  /** Short status line. */
+  tagline: string;
 }
 
 export type RoomStatus = 'lobby' | 'playing' | 'reveal' | 'over';
@@ -89,6 +106,10 @@ export interface PublicPlayer {
   lastPoints: number;
   connected: boolean;
   isHost: boolean;
+  avatar?: string;
+  favTech?: string;
+  color?: string;
+  tagline?: string;
 }
 
 export interface PublicRoom {

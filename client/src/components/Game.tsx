@@ -2,6 +2,7 @@ import confetti from 'canvas-confetti';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { avatarColor } from '../profile';
 import { socket } from '../socket';
 import type { Category, PublicRoom, RoundResultPayload, RoundStartPayload } from '../types';
 
@@ -196,6 +197,9 @@ export default function Game({ room, playerId, round, result }: Props) {
           {room.players.map((p, rank) => (
             <li key={p.id} className={`score-row ${p.id === playerId ? 'me' : ''}`}>
               <span className="score-rank">{rank + 1}</span>
+              <span className="avatar avatar-sm" style={{ background: avatarColor(p.name, p.color) }}>
+                {p.avatar || p.name.charAt(0).toUpperCase()}
+              </span>
               <span className="score-name">
                 {p.name}
                 {p.streak >= 2 && <span className="streak" title={`${p.streak} in a row`}>🔥{p.streak}</span>}

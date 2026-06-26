@@ -1,26 +1,34 @@
 import { useState } from 'react';
+import { avatarColor } from '../profile';
 import { socket } from '../socket';
+import type { PlayerProfile } from '../types';
 import SupportLink from './SupportLink';
 import RepoLink from './RepoLink';
 
 interface Props {
   connected: boolean;
   onJoined: (playerId: string) => void;
+  profile: PlayerProfile;
+  onProfileChange: (profile: PlayerProfile) => void;
+  onEditProfile: () => void;
 }
 
 type AckResponse = { ok: boolean; code?: string; playerId?: string; error?: string };
 
-const NAME_KEY = 'devguessr:name';
-
-export default function Home({ connected, onJoined }: Props) {
-  const [name, setName] = useState(() => localStorage.getItem(NAME_KEY) ?? '');
+export default function Home({
+  connected,
+  onJoined,
+  profile,
+  onProfileChange,
+  onEditProfile,
+}: Props) {
+  const name = profile.name;
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const rememberName = (value: string) => {
-    setName(value);
-    localStorage.setItem(NAME_KEY, value.trim());
+    onProfileChange({ ...profile, name: value });
   };
 
   const handleAck = (res: AckResponse) => {
@@ -36,7 +44,7 @@ export default function Home({ connected, onJoined }: Props) {
     if (!name.trim()) return setError('Enter a display name first.');
     setError(null);
     setBusy(true);
-    socket.emit('room:create', { name: name.trim() }, handleAck);
+    socket.emit('room:create', { name: name.trim(), profile }, handleAck);
   };
 
   const join = () => {
@@ -44,7 +52,11 @@ export default function Home({ connected, onJoined }: Props) {
     if (joinCode.trim().length < 4) return setError('Enter a 4-letter room code.');
     setError(null);
     setBusy(true);
-    socket.emit('room:join', { name: name.trim(), code: joinCode.trim().toUpperCase() }, handleAck);
+    socket.emit(
+      'room:join',
+      { name: name.trim(), code: joinCode.trim().toUpperCase(), profile },
+      handleAck,
+    );
   };
 
   return (
@@ -69,14 +81,27 @@ export default function Home({ connected, onJoined }: Props) {
       <div className="card join-card">
         <label className="field">
           <span>Display name</span>
-          <input
-            value={name}
-            maxLength={20}
-            placeholder="e.g. ada_lovelace"
-            onChange={(e) => rememberName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && create()}
-          />
+          <div className="name-row">
+            <span
+              className="avatar"
+              style={{ background: avatarColor(name, profile.color) }}
+              aria-hidden="true"
+            >
+              {profile.avatar || (name.trim().charAt(0) || '?').toUpperCase()}
+            </span>
+            <input
+              value={name}
+              maxLength={20}
+              placeholder="e.g. ada_lovelace"
+              onChange={(e) => rememberName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && create()}
+            />
+          </div>
         </label>
+
+        <button type="button" className="btn btn-ghost customize-btn" onClick={onEditProfile}>
+          ✨ Customize profile
+        </button>
 
         <button className="btn btn-primary big" disabled={busy || !connected} onClick={create}>
           Create a room

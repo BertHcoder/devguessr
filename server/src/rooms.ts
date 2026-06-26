@@ -3,6 +3,7 @@ import { ALL_QUESTIONS, ANSWER_POOLS, type RawQuestion } from './gameData.js';
 import type {
   Category,
   Player,
+  PlayerProfile,
   PublicPlayer,
   PublicQuestion,
   PublicRoom,
@@ -96,8 +97,25 @@ export function deleteRoom(code: string): void {
   rooms.delete(code);
 }
 
-export function addPlayer(room: Room, id: string, name: string): Player {
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
+/** Validate and clamp a profile so it is always safe to broadcast. */
+function sanitizeProfile(
+  p?: Partial<PlayerProfile> | null,
+): Pick<Player, 'avatar' | 'favTech' | 'color' | 'tagline'> {
+  return {
+    // Keep at most a few code points so multi-codepoint emoji survive.
+    avatar: typeof p?.avatar === 'string' ? [...p.avatar].slice(0, 3).join('') : '',
+    favTech: typeof p?.favTech === 'string' ? p.favTech.trim().slice(0, 20) : '',
+    // Only accept a strict hex colour; anything else falls back to the auto colour.
+    color: typeof p?.color === 'string' && HEX_COLOR_RE.test(p.color) ? p.color : '',
+    tagline: typeof p?.tagline === 'string' ? p.tagline.trim().slice(0, 40) : '',
+  };
+}
+
+export function addPlayer(room: Room, id: string, name: string, profile?: Partial<PlayerProfile>): Player {
   const isHost = room.players.size === 0;
+  const prof = sanitizeProfile(profile);
   const player: Player = {
     id,
     name: name.trim().slice(0, 20) || 'Player',
@@ -108,10 +126,33 @@ export function addPlayer(room: Room, id: string, name: string): Player {
     lastPoints: 0,
     connected: true,
     isHost,
+    avatar: prof.avatar,
+    favTech: prof.favTech,
+    color: prof.color,
+    tagline: prof.tagline,
   };
   room.players.set(id, player);
   if (isHost) room.hostId = id;
   return player;
+}
+
+/** Update a connected player's profile in place. Returns false if the player is unknown. */
+export function updatePlayerProfile(
+  room: Room,
+  id: string,
+  profile: Partial<PlayerProfile>,
+): boolean {
+  const player = room.players.get(id);
+  if (!player) return false;
+  const prof = sanitizeProfile(profile);
+  if (typeof profile.name === 'string') {
+    player.name = profile.name.trim().slice(0, 20) || player.name;
+  }
+  player.avatar = prof.avatar;
+  player.favTech = prof.favTech;
+  player.color = prof.color;
+  player.tagline = prof.tagline;
+  return true;
 }
 
 export function removePlayer(room: Room, id: string): void {
@@ -223,6 +264,10 @@ export function toPublicPlayer(p: Player): PublicPlayer {
     lastPoints: p.lastPoints,
     connected: p.connected,
     isHost: p.isHost,
+    avatar: p.avatar,
+    favTech: p.favTech,
+    color: p.color,
+    tagline: p.tagline,
   };
 }
 

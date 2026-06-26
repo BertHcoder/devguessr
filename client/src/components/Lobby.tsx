@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { avatarColor } from '../profile';
 import { socket } from '../socket';
 import type { Category, PublicRoom } from '../types';
 
@@ -59,10 +60,14 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
           <ul className="player-list">
             {room.players.map((p) => (
               <li key={p.id} className={`player-row ${p.id === playerId ? 'me' : ''}`}>
-                <span className="avatar" style={{ background: avatarColor(p.name) }}>
-                  {p.name.charAt(0).toUpperCase()}
+                <span className="avatar" style={{ background: avatarColor(p.name, p.color) }}>
+                  {p.avatar || p.name.charAt(0).toUpperCase()}
                 </span>
-                <span className="player-name">{p.name}{p.id === playerId ? ' (you)' : ''}</span>
+                <div className="player-id-col">
+                  <span className="player-name">{p.name}{p.id === playerId ? ' (you)' : ''}</span>
+                  {p.tagline && <span className="player-tagline">{p.tagline}</span>}
+                </div>
+                {p.favTech && <span className="tag fav-tech-tag">{p.favTech}</span>}
                 {p.isHost && <span className="tag host-tag">Host</span>}
                 {!p.connected && <span className="tag">offline</span>}
               </li>
@@ -149,14 +154,4 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
       </div>
     </div>
   );
-}
-
-function avatarColor(name: string): string {
-  const palette = [
-    '#ff6a3d', '#f5a623', '#27cdb0', '#ff6f9d', '#45cf8a',
-    '#ff9d3c', '#e8c14b', '#f2584e', '#2f9e8f', '#d98344',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
 }

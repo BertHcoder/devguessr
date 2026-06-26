@@ -19,8 +19,9 @@ import {
   submitAnswer,
   toPublicQuestion,
   toPublicRoom,
+  updatePlayerProfile,
 } from './rooms.js';
-import type { Room, RoomSettings } from './types.js';
+import type { PlayerProfile, Room, RoomSettings } from './types.js';
 
 const PORT = Number(process.env.PORT) || 3001;
 const REVEAL_MS = 5000;
@@ -106,13 +107,13 @@ io.on('connection', (socket) => {
   socket.on(
     'room:create',
     (
-      payload: { name: string; settings?: Partial<RoomSettings> },
+      payload: { name: string; settings?: Partial<RoomSettings>; profile?: Partial<PlayerProfile> },
       ack: (res: { ok: boolean; code?: string; playerId?: string; error?: string }) => void,
     ) => {
       try {
         const room = createRoom();
         if (payload.settings) applySettings(room, payload.settings);
-        addPlayer(room, socket.id, payload.name);
+        addPlayer(room, socket.id, payload.name, payload.profile);
         socket.join(room.code);
         socketRoom.set(socket.id, room.code);
         ack({ ok: true, code: room.code, playerId: socket.id });
@@ -126,7 +127,7 @@ io.on('connection', (socket) => {
   socket.on(
     'room:join',
     (
-      payload: { code: string; name: string },
+      payload: { code: string; name: string; profile?: Partial<PlayerProfile> },
       ack: (res: { ok: boolean; code?: string; playerId?: string; error?: string }) => void,
     ) => {
       const room = getRoom(payload.code);
@@ -134,13 +135,21 @@ io.on('connection', (socket) => {
       if (room.status !== 'lobby') return ack({ ok: false, error: 'Game already in progress.' });
       if (room.players.size >= 12) return ack({ ok: false, error: 'Room is full.' });
 
-      addPlayer(room, socket.id, payload.name);
+      addPlayer(room, socket.id, payload.name, payload.profile);
       socket.join(room.code);
       socketRoom.set(socket.id, room.code);
       ack({ ok: true, code: room.code, playerId: socket.id });
       broadcastRoom(room);
     },
   );
+
+  socket.on('profile:update', (payload: Partial<PlayerProfile>) => {
+    const room = getRoom(socketRoom.get(socket.id) ?? '');
+    if (!room) return;
+    // Cosmetic only, and only while nothing is mid-round.
+    if (room.status !== 'lobby' && room.status !== 'over') return;
+    if (updatePlayerProfile(room, socket.id, payload)) broadcastRoom(room);
+  });
 
   socket.on('room:settings', (payload: Partial<RoomSettings>) => {
     const room = getRoom(socketRoom.get(socket.id) ?? '');

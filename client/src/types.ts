@@ -9,6 +9,19 @@ export interface RoomSettings {
   progressiveReveal: boolean;
 }
 
+/** Optional, player-customizable profile sent when joining and editable in the lobby. */
+export interface PlayerProfile {
+  name: string;
+  /** Emoji avatar, or '' to fall back to the name initial. */
+  avatar: string;
+  /** Free-text favourite technology shown as a badge. */
+  favTech: string;
+  /** Hex accent colour (e.g. '#ff6a3d'), or '' to use the auto colour. */
+  color: string;
+  /** Short status line. */
+  tagline: string;
+}
+
 export interface PublicPlayer {
   id: string;
   name: string;
@@ -18,6 +31,10 @@ export interface PublicPlayer {
   lastPoints: number;
   connected: boolean;
   isHost: boolean;
+  avatar?: string;
+  favTech?: string;
+  color?: string;
+  tagline?: string;
 }
 
 export interface PublicRoom {

@@ -840,6 +840,23 @@ const companies: RawQuestion[] = [
   { id: 'co-nginx', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Nginx', slug: 'nginx', color: '#009639', fact: 'A web server and reverse proxy pronounced "engine-x".' },
   { id: 'co-supabase', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Supabase', slug: 'supabase', color: '#3FCF8E', fact: 'An open-source alternative to Firebase built on Postgres.' },
   { id: 'co-deno', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Deno', slug: 'deno', color: '#f0f6fc', fact: 'A secure JavaScript runtime from the creator of Node.js.' },
+  { id: 'co-anthropic', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Anthropic', slug: 'anthropic', color: '#D97757', fact: 'The AI safety company behind the Claude family of models.' },
+  { id: 'co-openai', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'OpenAI', slug: 'openai', color: '#f0f6fc', fact: 'Creator of ChatGPT and the GPT series of models.' },
+  { id: 'co-huggingface', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Hugging Face', slug: 'huggingface', color: '#FFD21E', fact: 'The "GitHub of machine learning" — a hub for open models.' },
+  { id: 'co-googlegemini', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Google Gemini', slug: 'googlegemini', color: '#886FBF', fact: "Google's flagship family of multimodal AI models." },
+  { id: 'co-ollama', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ollama', slug: 'ollama', color: '#f0f6fc', fact: 'Run large language models locally with a single command.' },
+  { id: 'co-perplexity', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Perplexity', slug: 'perplexity', color: '#1FB8CD', fact: 'An AI-powered answer engine that cites its sources.' },
+  { id: 'co-nvidia', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Nvidia', slug: 'nvidia', color: '#76B900', fact: 'Its GPUs power most of the world\'s AI training.' },
+  { id: 'co-meta', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Meta', slug: 'meta', color: '#0467DF', fact: 'Built React and PyTorch, and the open Llama models.' },
+  { id: 'co-apple', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Apple', slug: 'apple', color: '#f0f6fc', fact: 'Creator of Swift, the language for iOS and macOS apps.' },
+  { id: 'co-microsoft', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Microsoft', slug: 'microsoft', color: '#5E5E5E', fact: 'Created TypeScript, C#, and Visual Studio Code.' },
+  { id: 'co-discord', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Discord', slug: 'discord', color: '#5865F2', fact: 'A chat platform that became home to countless dev communities.' },
+  { id: 'co-reddit', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Reddit', slug: 'reddit', color: '#FF4500', fact: 'Its codebase was open-sourced for many years.' },
+  { id: 'co-stripe', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Stripe', slug: 'stripe', color: '#635BFF', fact: 'Developer-first payments infrastructure for the internet.' },
+  { id: 'co-jetbrains', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'JetBrains', slug: 'jetbrains', color: '#f0f6fc', fact: 'Makers of IntelliJ IDEA and the Kotlin language.' },
+  { id: 'co-notion', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Notion', slug: 'notion', color: '#f0f6fc', fact: 'An all-in-one workspace for notes, docs, and databases.' },
+  { id: 'co-atlassian', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Atlassian', slug: 'atlassian', color: '#0052CC', fact: 'The company behind Jira, Confluence, and Bitbucket.' },
+  { id: 'co-postman', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Postman', slug: 'postman', color: '#FF6C37', fact: 'The go-to tool for building and testing APIs.' },
 ];
 
 /* -------------------------------------------------------------------------- */
