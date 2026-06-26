@@ -247,6 +247,225 @@ end
 
 [~c"Ann", ~c"Bo"] |> Enum.each(&Greeter.hello/1)`,
   },
+  {
+    id: 'lang-scala',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Scala',
+    highlight: 'scala',
+    fact: 'Fuses object-oriented and functional programming on the JVM.',
+    code: `object Main extends App {
+  val nums = List(5, 2, 8, 1)
+  val sorted = nums.sortWith(_ < _)
+  sorted.foreach(println)
+}`,
+  },
+  {
+    id: 'lang-clojure',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Clojure',
+    highlight: 'clojure',
+    fact: 'A modern Lisp dialect that runs on the JVM.',
+    code: `(defn fib [n]
+  (take n
+    (map first
+      (iterate (fn [[a b]] [b (+ a b)]) [0 1]))))
+
+(println (fib 10))`,
+  },
+  {
+    id: 'lang-lua',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Lua',
+    highlight: 'lua',
+    fact: 'A lightweight scripting language embedded in many games.',
+    code: `local t = {3, 1, 2}
+table.sort(t)
+for i, v in ipairs(t) do
+  print(i, v)
+end`,
+  },
+  {
+    id: 'lang-perl',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Perl',
+    highlight: 'perl',
+    fact: 'Once called the "duct tape" of the internet.',
+    code: `my @words = qw(beta alpha gamma);
+my @sorted = sort @words;
+print "$_\n" for @sorted;`,
+  },
+  {
+    id: 'lang-r',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'R',
+    highlight: 'r',
+    fact: 'The go-to language for statistics and data analysis.',
+    code: `nums <- c(4, 8, 15, 16, 23, 42)
+squared <- sapply(nums, function(x) x^2)
+print(mean(squared))`,
+  },
+  {
+    id: 'lang-julia',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Julia',
+    highlight: 'julia',
+    fact: 'Designed for high-performance numerical computing.',
+    code: `function mandel(c)
+    z = 0
+    for i in 1:100
+        z = z^2 + c
+        abs(z) > 2 && return i
+    end
+    return 100
+end`,
+  },
+  {
+    id: 'lang-fsharp',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'F#',
+    highlight: 'fsharp',
+    fact: 'A functional-first language on the .NET platform.',
+    code: `let rec factorial n =
+    match n with
+    | 0 -> 1
+    | _ -> n * factorial (n - 1)
+
+printfn "%d" (factorial 5)`,
+  },
+  {
+    id: 'lang-ocaml',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'OCaml',
+    highlight: 'ocaml',
+    fact: 'An ML-family language; inspired Rust and ReasonML.',
+    code: `let rec sum = function
+  | [] -> 0
+  | x :: xs -> x + sum xs
+
+let () = Printf.printf "%d\n" (sum [1; 2; 3; 4])`,
+  },
+  {
+    id: 'lang-zig',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Zig',
+    highlight: 'zig',
+    fact: 'A modern systems language aiming to replace C, with no hidden control flow.',
+    code: `const std = @import("std");
+
+pub fn main() void {
+    var sum: u32 = 0;
+    for (0..10) |i| {
+        sum += @intCast(i);
+    }
+    std.debug.print("{}\n", .{sum});
+}`,
+  },
+  {
+    id: 'lang-erlang',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Erlang',
+    highlight: 'erlang',
+    fact: 'Built by Ericsson for telecom systems with nine-nines uptime.',
+    code: `-module(fact).
+-export([calc/1]).
+
+calc(0) -> 1;
+calc(N) -> N * calc(N - 1).`,
+  },
+  {
+    id: 'lang-dart',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Dart',
+    highlight: 'dart',
+    fact: 'The language powering Flutter, optimized for UI.',
+    code: `void main() {
+  final nums = [3, 1, 2]..sort();
+  for (final n in nums) {
+    print(n);
+  }
+}`,
+  },
+  {
+    id: 'lang-cobol',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'COBOL',
+    highlight: 'cobol',
+    fact: 'Born in 1959; still runs much of the world\'s banking systems.',
+    code: `       IDENTIFICATION DIVISION.
+       PROGRAM-ID. HELLO.
+       PROCEDURE DIVISION.
+           DISPLAY "HELLO, WORLD!".
+           STOP RUN.`,
+  },
+  {
+    id: 'lang-fortran',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Fortran',
+    highlight: 'fortran',
+    fact: 'The first widely used high-level language, dating to 1957.',
+    code: `program squares
+  integer :: i
+  do i = 1, 5
+    print *, i, i**2
+  end do
+end program squares`,
+  },
+  {
+    id: 'lang-lisp',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Lisp',
+    highlight: 'lisp',
+    fact: 'One of the oldest languages; famous for its parentheses.',
+    code: `(defun factorial (n)
+  (if (<= n 1)
+      1
+      (* n (factorial (- n 1)))))
+
+(print (factorial 5))`,
+  },
+  {
+    id: 'lang-assembly',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Assembly',
+    highlight: 'nasm',
+    fact: 'As close to the bare metal as human-readable code gets.',
+    code: `section .text
+  global _start
+_start:
+  mov rax, 60
+  mov rdi, 0
+  syscall`,
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -469,6 +688,122 @@ Route::get('/users', function () {
   });
 });`,
   },
+  {
+    id: 'fw-fastapi',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'FastAPI',
+    highlight: 'python',
+    fact: 'A modern Python framework built on type hints and async.',
+    code: `from fastapi import FastAPI
+app = FastAPI()
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: int, q: str | None = None):
+    return {"item_id": item_id, "q": q}`,
+  },
+  {
+    id: 'fw-nestjs',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'NestJS',
+    highlight: 'typescript',
+    fact: 'A Node.js framework heavily inspired by Angular.',
+    code: `@Controller('cats')
+export class CatsController {
+  @Get()
+  findAll(): string {
+    return 'This returns all cats';
+  }
+}`,
+  },
+  {
+    id: 'fw-fastify',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Fastify',
+    highlight: 'javascript',
+    fact: 'A high-performance Node.js web framework focused on low overhead.',
+    code: `const fastify = require('fastify')();
+
+fastify.get('/', async (request, reply) => {
+  return { hello: 'world' };
+});
+
+fastify.listen({ port: 3000 });`,
+  },
+  {
+    id: 'fw-phoenix',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Phoenix',
+    highlight: 'elixir',
+    fact: 'The Elixir web framework known for real-time LiveView.',
+    code: `defmodule HelloWeb.PageController do
+  use HelloWeb, :controller
+
+  def index(conn, _params) do
+    render(conn, :index)
+  end
+end`,
+  },
+  {
+    id: 'fw-solid',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'SolidJS',
+    highlight: 'jsx',
+    fact: 'Uses fine-grained reactivity with signals — no virtual DOM.',
+    code: `function Counter() {
+  const [count, setCount] = createSignal(0);
+  return (
+    <button onClick={() => setCount(count() + 1)}>
+      {count()}
+    </button>
+  );
+}`,
+  },
+  {
+    id: 'fw-qt',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Qt',
+    highlight: 'cpp',
+    fact: 'A cross-platform C++ toolkit for native GUI applications.',
+    code: `#include <QApplication>
+#include <QPushButton>
+
+int main(int argc, char **argv) {
+    QApplication app(argc, argv);
+    QPushButton button("Click me");
+    button.show();
+    return app.exec();
+}`,
+  },
+  {
+    id: 'fw-pytorch',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'PyTorch',
+    highlight: 'python',
+    fact: 'A deep-learning framework from Meta, loved for its dynamic graphs.',
+    code: `import torch
+import torch.nn as nn
+
+model = nn.Sequential(
+    nn.Linear(10, 64),
+    nn.ReLU(),
+    nn.Linear(64, 1),
+)
+out = model(torch.randn(1, 10))`,
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -495,6 +830,16 @@ const companies: RawQuestion[] = [
   { id: 'co-npm', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'npm', slug: 'npm', color: '#CB3837', fact: 'The default package manager for Node.js.' },
   { id: 'co-postgresql', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'PostgreSQL', slug: 'postgresql', color: '#4169E1', fact: 'Affectionately known as "Postgres".' },
   { id: 'co-kubernetes', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Kubernetes', slug: 'kubernetes', color: '#326CE5', fact: 'Greek for "helmsman"; often shortened to "K8s".' },
+  { id: 'co-cloudflare', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Cloudflare', slug: 'cloudflare', color: '#F38020', fact: 'Runs one of the world\'s largest content delivery networks.' },
+  { id: 'co-terraform', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Terraform', slug: 'terraform', color: '#7B42BC', fact: 'HashiCorp\'s tool for infrastructure as code.' },
+  { id: 'co-graphql', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'GraphQL', slug: 'graphql', color: '#E10098', fact: 'A query language for APIs, created at Facebook.' },
+  { id: 'co-rabbitmq', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'RabbitMQ', slug: 'rabbitmq', color: '#FF6600', fact: 'A widely used message broker built in Erlang.' },
+  { id: 'co-elasticsearch', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Elasticsearch', slug: 'elasticsearch', color: '#005571', fact: 'The search engine at the heart of the ELK stack.' },
+  { id: 'co-grafana', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Grafana', slug: 'grafana', color: '#F46800', fact: 'A popular open-source observability and dashboard tool.' },
+  { id: 'co-prometheus', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Prometheus', slug: 'prometheus', color: '#E6522C', fact: 'A monitoring system born at SoundCloud.' },
+  { id: 'co-nginx', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Nginx', slug: 'nginx', color: '#009639', fact: 'A web server and reverse proxy pronounced "engine-x".' },
+  { id: 'co-supabase', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Supabase', slug: 'supabase', color: '#3FCF8E', fact: 'An open-source alternative to Firebase built on Postgres.' },
+  { id: 'co-deno', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Deno', slug: 'deno', color: '#f0f6fc', fact: 'A secure JavaScript runtime from the creator of Node.js.' },
 ];
 
 export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies];

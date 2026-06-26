@@ -2,6 +2,7 @@ import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
 import { socket } from '../socket';
 import type { PublicPlayer, PublicRoom } from '../types';
+import SupportLink from './SupportLink';
 
 interface Props {
   room: PublicRoom;
@@ -87,6 +88,8 @@ export default function Results({ room, playerId, leaderboard, onLeave }: Props)
         )}
         <button className="btn btn-ghost" onClick={onLeave}>Back to home</button>
       </div>
+
+      <SupportLink />
     </div>
   );
 }

@@ -208,6 +208,33 @@ input { font-family: inherit; }
 .hint { color: var(--muted); font-size: 0.85rem; margin: 0; }
 .footnote { color: var(--muted); font-size: 0.85rem; }
 
+/* --------------------------- Buy me a coffee link ------------------------- */
+.support-link {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  opacity: 0.85;
+  transition: color 0.15s ease, opacity 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease, transform 0.08s ease;
+}
+.support-icon { flex-shrink: 0; opacity: 0.9; }
+.support-link:hover {
+  color: var(--amber);
+  border-color: rgba(245, 181, 61, 0.5);
+  background: rgba(245, 181, 61, 0.1);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
 /* ----------------------------------- Lobby -------------------------------- */
 .lobby { display: flex; flex-direction: column; gap: 1.2rem; }
 .code-card { text-align: center; }

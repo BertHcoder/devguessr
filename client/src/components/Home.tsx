@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { socket } from '../socket';
+import SupportLink from './SupportLink';
 
 interface Props {
   connected: boolean;
@@ -102,6 +103,8 @@ export default function Home({ connected, onJoined }: Props) {
       <p className="footnote">
         Play solo to practice, or share your room code and battle live.
       </p>
+
+      <SupportLink />
     </div>
   );
 }
