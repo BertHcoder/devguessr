@@ -3,6 +3,7 @@ import Game from './components/Game';
 import Home from './components/Home';
 import Lobby from './components/Lobby';
 import Results from './components/Results';
+import ThemePicker from './components/ThemePicker';
 import { socket } from './socket';
 import type {
   GameOverPayload,
@@ -99,9 +100,12 @@ export default function App() {
           <span className="brand-mark">{'</>'}</span>
           <span className="brand-name">DevGuessr</span>
         </button>
-        <span className={`conn ${connected ? 'on' : 'off'}`}>
-          {connected ? 'online' : 'connecting…'}
-        </span>
+        <div className="topbar-right">
+          <ThemePicker />
+          <span className={`conn ${connected ? 'on' : 'off'}`}>
+            {connected ? 'online' : 'connecting…'}
+          </span>
+        </div>
       </header>
       <main className="content">{view}</main>
     </div>
