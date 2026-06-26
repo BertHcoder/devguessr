@@ -18,9 +18,11 @@ const rooms = new Map<string, Room>();
 export const DEFAULT_SETTINGS: RoomSettings = {
   rounds: 8,
   roundTime: 20,
-  categories: ['language', 'framework', 'company'],
+  categories: ['language', 'framework', 'company', 'bug'],
   progressiveReveal: true,
 };
+
+const VALID_CATEGORIES: Category[] = ['language', 'framework', 'company', 'bug'];
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -33,10 +35,24 @@ function shuffle<T>(arr: T[]): T[] {
 
 /** Build a playable question with 4 shuffled options (1 correct + 3 distractors). */
 function buildQuestion(raw: RawQuestion): Question {
+  if (raw.category === 'bug') return buildBugQuestion(raw);
   const pool = ANSWER_POOLS[raw.category].filter((a) => a !== raw.answer);
   const distractors = shuffle(pool).slice(0, 3);
   const options = shuffle([raw.answer, ...distractors]);
   return { ...raw, options };
+}
+
+/** Build a "spot the bug" question whose options are line numbers drawn from
+ *  the snippet itself (the buggy line plus up to three other line numbers). */
+function buildBugQuestion(raw: RawQuestion): Question {
+  const lineCount = (raw.code ?? '').replace(/\n+$/, '').split('\n').length;
+  const bugLine = raw.bugLine ?? 1;
+  const others: number[] = [];
+  for (let n = 1; n <= lineCount; n++) if (n !== bugLine) others.push(n);
+  const distractors = shuffle(others).slice(0, 3).map((n) => `Line ${n}`);
+  const answer = `Line ${bugLine}`;
+  const options = shuffle([answer, ...distractors]);
+  return { ...raw, answer, options };
 }
 
 /** Pick `count` questions limited to the selected categories. */
@@ -115,10 +131,8 @@ export function removePlayer(room: Room, id: string): void {
 export function applySettings(room: Room, partial: Partial<RoomSettings>): void {
   const rounds = clamp(partial.rounds ?? room.settings.rounds, 3, 20);
   const roundTime = clamp(partial.roundTime ?? room.settings.roundTime, 10, 60);
-  const categories =
-    partial.categories && partial.categories.length
-      ? partial.categories
-      : room.settings.categories;
+  const requested = (partial.categories ?? []).filter((c) => VALID_CATEGORIES.includes(c));
+  const categories = requested.length ? requested : room.settings.categories;
   const progressiveReveal =
     partial.progressiveReveal ?? room.settings.progressiveReveal;
   room.settings = { rounds, roundTime, categories, progressiveReveal };

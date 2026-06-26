@@ -465,6 +465,7 @@ input { font-family: inherit; }
 .cat-language { color: var(--language); border-color: rgba(39, 205, 176, 0.45); background: rgba(39, 205, 176, 0.08); }
 .cat-framework { color: var(--framework); border-color: rgba(255, 111, 157, 0.45); background: rgba(255, 111, 157, 0.08); }
 .cat-company { color: var(--company); border-color: rgba(255, 194, 75, 0.45); background: rgba(255, 194, 75, 0.08); }
+.cat-bug { color: #f2705a; border-color: rgba(242, 112, 90, 0.45); background: rgba(242, 112, 90, 0.08); }
 .round-count { color: var(--muted); font-size: 0.9rem; margin-left: auto; }
 .timer {
   font-variant-numeric: tabular-nums;

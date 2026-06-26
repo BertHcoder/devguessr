@@ -1,4 +1,4 @@
-export type Category = 'language' | 'framework' | 'company';
+export type Category = 'language' | 'framework' | 'company' | 'bug';
 export type QuestionType = 'code' | 'logo';
 export type RoomStatus = 'lobby' | 'playing' | 'reveal' | 'over';
 

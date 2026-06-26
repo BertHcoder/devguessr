@@ -16,6 +16,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
   language: 'Guess the language',
   framework: 'Guess the framework',
   company: 'Guess the company',
+  bug: 'Spot the bug',
 };
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -72,6 +73,11 @@ export default function Game({ room, playerId, round, result }: Props) {
       : 0;
   const codeBlur = obscure * 6;
 
+  // "Spot the bug" rounds number every line and highlight the culprit on reveal.
+  const isBug = question.category === 'bug';
+  const revealedBugLine =
+    isBug && result ? Number(String(result.answer).replace(/\D+/g, '')) || null : null;
+
   const pick = (i: number) => {
     if (answered || result) return;
     setSelected(i);
@@ -113,6 +119,13 @@ export default function Game({ room, playerId, round, result }: Props) {
             <SyntaxHighlighter
               language={question.highlight || 'text'}
               style={oneDark}
+              showLineNumbers={isBug}
+              wrapLines={isBug}
+              lineProps={(lineNumber: number) =>
+                revealedBugLine && lineNumber === revealedBugLine
+                  ? { style: { display: 'block', background: 'rgba(242, 88, 78, 0.25)' } }
+                  : {}
+              }
               customStyle={{
                 margin: 0,
                 borderRadius: 14,
@@ -123,7 +136,7 @@ export default function Game({ room, playerId, round, result }: Props) {
                 filter: codeBlur ? `blur(${codeBlur.toFixed(1)}px)` : undefined,
                 transition: 'filter 0.18s linear',
               }}
-              wrapLongLines
+              wrapLongLines={!isBug}
             >
               {question.code ?? ''}
             </SyntaxHighlighter>

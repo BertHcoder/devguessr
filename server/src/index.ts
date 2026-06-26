@@ -1,4 +1,6 @@
 import http from 'node:http';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express from 'express';
 import { Server } from 'socket.io';
@@ -209,6 +211,14 @@ io.on('connection', (socket) => {
     broadcastRoom(room);
   }
 });
+
+// Serve the built client so the whole app runs as a single service.
+const clientDist = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../client/dist',
+);
+app.use(express.static(clientDist));
+app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 
 server.listen(PORT, () => {
   console.log(`DevGuessr server listening on http://localhost:${PORT}`);

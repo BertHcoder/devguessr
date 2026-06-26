@@ -842,11 +842,130 @@ const companies: RawQuestion[] = [
   { id: 'co-deno', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Deno', slug: 'deno', color: '#f0f6fc', fact: 'A secure JavaScript runtime from the creator of Node.js.' },
 ];
 
-export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies];
+/* -------------------------------------------------------------------------- */
+/*  SPOT-THE-BUG QUESTIONS — find the single broken line in a snippet.          */
+/*  `bugLine` is the 1-based line number; line-number options are generated     */
+/*  per game from the snippet itself.                                           */
+/* -------------------------------------------------------------------------- */
+
+const bugs: RawQuestion[] = [
+  {
+    id: 'bug-js-offbyone',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 3',
+    bugLine: 3,
+    highlight: 'javascript',
+    fact: 'The loop condition `i <= arr.length` reads one index past the end — it should be `<`.',
+    code: `function sum(arr) {
+  let total = 0;
+  for (let i = 0; i <= arr.length; i++) {
+    total += arr[i];
+  }
+  return total;
+}`,
+  },
+  {
+    id: 'bug-py-range',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 3',
+    bugLine: 3,
+    highlight: 'python',
+    fact: '`range(1, n)` stops at n-1, so the final factor is skipped — use `range(1, n + 1)`.',
+    code: `def factorial(n):
+    result = 1
+    for i in range(1, n):
+        result *= i
+    return result`,
+  },
+  {
+    id: 'bug-ts-assign',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 2',
+    bugLine: 2,
+    highlight: 'typescript',
+    fact: 'A single `=` is assignment; the comparison needs `n % 2 === 0`.',
+    code: `function isEven(n: number): boolean {
+  if (n % 2 = 0) {
+    return true;
+  }
+  return false;
+}`,
+  },
+  {
+    id: 'bug-js-await',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 2',
+    bugLine: 2,
+    highlight: 'javascript',
+    fact: 'fetch() returns a Promise — line 2 needs `await`, otherwise res.json() fails.',
+    code: `async function getUser(id) {
+  const res = fetch(\`/api/users/\${id}\`);
+  const data = await res.json();
+  return data;
+}`,
+  },
+  {
+    id: 'bug-go-assign',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 9',
+    bugLine: 9,
+    highlight: 'go',
+    fact: '`=+` assigns the positive value each iteration; you meant the `+=` operator.',
+    code: `package main
+
+import "fmt"
+
+func main() {
+	nums := []int{1, 2, 3}
+	sum := 0
+	for i := 0; i < len(nums); i++ {
+		sum =+ nums[i]
+	}
+	fmt.Println(sum)
+}`,
+  },
+  {
+    id: 'bug-cs-semicolon',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 8',
+    bugLine: 8,
+    highlight: 'csharp',
+    fact: 'The stray `;` after `if (n > max)` makes the body empty, so `max = n;` always runs.',
+    code: `using System;
+
+class Program {
+    static void Main() {
+        int[] nums = { 4, 8, 15, 16 };
+        int max = 0;
+        foreach (int n in nums) {
+            if (n > max);
+                max = n;
+        }
+        Console.WriteLine(max);
+    }
+}`,
+  },
+];
+
+export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies, ...bugs];
 
 /** Distinct answer pools per category, used to generate distractor options. */
 export const ANSWER_POOLS: Record<Category, string[]> = {
   language: Array.from(new Set(languages.map((q) => q.answer))),
   framework: Array.from(new Set(frameworks.map((q) => q.answer))),
   company: Array.from(new Set(companies.map((q) => q.answer))),
+  // Bug questions derive their line-number options per game (see buildBugQuestion).
+  bug: [],
 };

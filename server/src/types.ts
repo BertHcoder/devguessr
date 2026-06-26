@@ -1,4 +1,4 @@
-export type Category = 'language' | 'framework' | 'company';
+export type Category = 'language' | 'framework' | 'company' | 'bug';
 
 export type QuestionType = 'code' | 'logo';
 
@@ -15,6 +15,8 @@ export interface Question {
   options: string[];
   /** For `code` questions: the snippet to display. */
   code?: string;
+  /** For `bug` questions: the 1-based line number that contains the bug (never sent to clients). */
+  bugLine?: number;
   /** Prism language id used for syntax highlighting (does not reveal the answer for similar languages). */
   highlight?: string;
   /** For `logo` questions: a simple-icons slug rendered as a colored silhouette. */

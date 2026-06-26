@@ -12,6 +12,7 @@ const CATEGORY_META: { id: Category; label: string; icon: string }[] = [
   { id: 'language', label: 'Languages', icon: '</>' },
   { id: 'framework', label: 'Frameworks', icon: '⚙' },
   { id: 'company', label: 'Companies', icon: '★' },
+  { id: 'bug', label: 'Spot the bug', icon: '🐛' },
 ];
 
 export default function Lobby({ room, playerId, onLeave }: Props) {
