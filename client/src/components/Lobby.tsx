@@ -115,6 +115,24 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
               })}
             </div>
           </div>
+
+          <div className="setting">
+            <label>Progressive reveal</label>
+            <button
+              type="button"
+              className={`toggle ${room.settings.progressiveReveal ? 'on' : ''}`}
+              role="switch"
+              aria-checked={room.settings.progressiveReveal}
+              disabled={!isHost}
+              onClick={() => updateSettings({ progressiveReveal: !room.settings.progressiveReveal })}
+            >
+              <span className="toggle-knob" />
+              {room.settings.progressiveReveal ? 'On' : 'Off'}
+            </button>
+            <span className="setting-hint">
+              Snippets &amp; logos start obscured and sharpen as the timer runs — guess early for more points.
+            </span>
+          </div>
         </div>
       </div>
 

@@ -59,6 +59,8 @@ export interface RoomSettings {
   rounds: number;
   roundTime: number; // seconds
   categories: Category[];
+  /** When true, code/logos start obscured and sharpen as the round timer runs. */
+  progressiveReveal: boolean;
 }
 
 export interface Room {

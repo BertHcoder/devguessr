@@ -6,6 +6,7 @@ export interface RoomSettings {
   rounds: number;
   roundTime: number;
   categories: Category[];
+  progressiveReveal: boolean;
 }
 
 export interface PublicPlayer {

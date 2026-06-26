@@ -63,6 +63,15 @@ export default function Game({ room, playerId, round, result }: Props) {
   const secondsLeft = Math.ceil(remaining / 1000);
   const progress = result ? 0 : Math.max(0, Math.min(1, remaining / total));
 
+  // Progressive reveal: obscure the stage early in the round (when enabled),
+  // sharpening to fully clear by roughly the half-way mark so early guesses are
+  // riskier but worth more points. Clears once the player has locked in.
+  const obscure =
+    room.settings.progressiveReveal && !result && !answered
+      ? Math.max(0, Math.min(1, (progress - 0.5) / 0.5))
+      : 0;
+  const codeBlur = obscure * 6;
+
   const pick = (i: number) => {
     if (answered || result) return;
     setSelected(i);
@@ -111,6 +120,8 @@ export default function Game({ room, playerId, round, result }: Props) {
                 fontSize: '0.95rem',
                 background: '#1c160f',
                 maxHeight: '46vh',
+                filter: codeBlur ? `blur(${codeBlur.toFixed(1)}px)` : undefined,
+                transition: 'filter 0.18s linear',
               }}
               wrapLongLines
             >
@@ -121,6 +132,7 @@ export default function Game({ room, playerId, round, result }: Props) {
               slug={question.slug ?? ''}
               revealed={!!result}
               color={question.color ?? '#f6ecdd'}
+              obscure={obscure}
             />
           )}
         </div>
@@ -188,20 +200,33 @@ export default function Game({ room, playerId, round, result }: Props) {
   );
 }
 
-function LogoStage({ slug, revealed, color }: { slug: string; revealed: boolean; color: string }) {
+function LogoStage({ slug, revealed, color, obscure }: { slug: string; revealed: boolean; color: string; obscure: number }) {
   // During play the logo is shown as a neutral silhouette; the real brand
-  // color is revealed once the round ends.
+  // color is revealed once the round ends. With progressive reveal enabled it
+  // also starts zoomed-in and blurred, easing out as the timer runs.
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [slug]);
+
   const hex = (revealed ? color : '#c2b4a0').replace('#', '');
   const src = `https://cdn.simpleicons.org/${slug}/${hex}`;
+  const obscureStyle =
+    obscure > 0
+      ? { filter: `blur(${(obscure * 12).toFixed(1)}px)`, transform: `scale(${(1 + obscure * 0.7).toFixed(2)})` }
+      : undefined;
   return (
     <div className={`logo-stage ${revealed ? 'revealed' : ''}`}>
-      <img
-        src={src}
-        alt="Mystery brand logo"
-        className="logo-img"
-        draggable={false}
-        onError={(e) => ((e.target as HTMLImageElement).style.opacity = '0.2')}
-      />
+      {failed ? (
+        <div className="logo-fallback" role="img" aria-label="Logo unavailable">?</div>
+      ) : (
+        <img
+          src={src}
+          alt="Mystery brand logo"
+          className="logo-img"
+          draggable={false}
+          style={obscureStyle}
+          onError={() => setFailed(true)}
+        />
+      )}
     </div>
   );
 }

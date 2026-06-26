@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   rounds: 8,
   roundTime: 20,
   categories: ['language', 'framework', 'company'],
+  progressiveReveal: true,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -118,7 +119,9 @@ export function applySettings(room: Room, partial: Partial<RoomSettings>): void 
     partial.categories && partial.categories.length
       ? partial.categories
       : room.settings.categories;
-  room.settings = { rounds, roundTime, categories };
+  const progressiveReveal =
+    partial.progressiveReveal ?? room.settings.progressiveReveal;
+  room.settings = { rounds, roundTime, categories, progressiveReveal };
 }
 
 function clamp(n: number, min: number, max: number): number {
