@@ -57,3 +57,13 @@ All content lives in [`server/src/gameData.ts`](server/src/gameData.ts). Add an 
 `languages`, `frameworks`, or `companies` arrays — multiple-choice options are generated
 automatically from each category's answer pool. Company logos use a
 [Simple Icons](https://simpleicons.org) `slug`.
+
+---
+
+## Support
+
+If this saved you time or you just like it, consider buying me a coffee:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/dirtymasterchief)
+
+---
