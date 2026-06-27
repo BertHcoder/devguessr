@@ -466,6 +466,174 @@ _start:
   mov rdi, 0
   syscall`,
   },
+  {
+    id: 'lang-c',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'C',
+    highlight: 'c',
+    fact: 'Created by Dennis Ritchie at Bell Labs in the early 1970s.',
+    code: `#include <stdio.h>
+
+int main(void) {
+    int sum = 0;
+    for (int i = 1; i <= 10; i++) {
+        sum += i;
+    }
+    printf("%d\\n", sum);
+    return 0;
+}`,
+  },
+  {
+    id: 'lang-objc',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Objective-C',
+    highlight: 'objectivec',
+    fact: "Apple's main language before Swift; note the @ literals and bracket calls.",
+    code: `#import <Foundation/Foundation.h>
+
+int main() {
+    NSArray *names = @[@"Sam", @"Lee"];
+    for (NSString *name in names) {
+        NSLog(@"Hello, %@", name);
+    }
+    return 0;
+}`,
+  },
+  {
+    id: 'lang-groovy',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Groovy',
+    highlight: 'groovy',
+    fact: 'A dynamic JVM language and the basis of Gradle build scripts.',
+    code: `def squares = (1..5).collect { it * it }
+squares.each { println it }`,
+  },
+  {
+    id: 'lang-matlab',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'MATLAB',
+    highlight: 'matlab',
+    fact: "Short for 'Matrix Laboratory'; nearly everything is a matrix.",
+    code: `A = magic(4);
+rowSums = sum(A, 2);
+disp(rowSums)`,
+  },
+  {
+    id: 'lang-pascal',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Pascal',
+    highlight: 'pascal',
+    fact: 'Designed by Niklaus Wirth to teach structured programming.',
+    code: `program Sum;
+var
+  i, total: integer;
+begin
+  total := 0;
+  for i := 1 to 10 do
+    total := total + i;
+  writeln(total);
+end.`,
+  },
+  {
+    id: 'lang-crystal',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Crystal',
+    highlight: 'crystal',
+    fact: 'Ruby-like syntax with static types and native, compiled speed.',
+    code: `def add(a : Int32, b : Int32) : Int32
+  a + b
+end
+
+puts add(2, 3)`,
+  },
+  {
+    id: 'lang-nim',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Nim',
+    highlight: 'nim',
+    fact: 'Python-like syntax that compiles to C for native performance.',
+    code: `proc factorial(n: int): int =
+  result = 1
+  for i in 1..n:
+    result *= i
+
+echo factorial(5)`,
+  },
+  {
+    id: 'lang-solidity',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Solidity',
+    highlight: 'solidity',
+    fact: 'The main language for writing Ethereum smart contracts.',
+    code: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Counter {
+    uint256 public count;
+
+    function increment() external {
+        count += 1;
+    }
+}`,
+  },
+  {
+    id: 'lang-powershell',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'PowerShell',
+    highlight: 'powershell',
+    fact: "Microsoft's object-oriented shell and scripting language.",
+    code: `$files = Get-ChildItem -Filter *.log
+foreach ($file in $files) {
+    Write-Output "Compressing $($file.Name)"
+}`,
+  },
+  {
+    id: 'lang-gdscript',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'GDScript',
+    highlight: 'gdscript',
+    fact: 'The Python-inspired scripting language built into the Godot game engine.',
+    code: `extends Node
+
+func _ready():
+    var total = 0
+    for i in range(10):
+        total += i
+    print(total)`,
+  },
+  {
+    id: 'lang-elm',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Elm',
+    highlight: 'elm',
+    fact: 'A purely functional language for the front end, famous for no runtime errors.',
+    code: `import Html exposing (text)
+
+main =
+    text (String.fromInt (List.sum [1, 2, 3, 4]))`,
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -804,6 +972,182 @@ model = nn.Sequential(
 )
 out = model(torch.randn(1, 10))`,
   },
+  {
+    id: 'fw-symfony',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Symfony',
+    highlight: 'php',
+    fact: 'A mature PHP framework; many of its components power Laravel.',
+    code: `<?php
+class BlogController extends AbstractController
+{
+    #[Route('/blog', name: 'blog_list')]
+    public function list(): Response
+    {
+        return $this->render('blog/list.html.twig');
+    }
+}`,
+  },
+  {
+    id: 'fw-aspnet',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'ASP.NET Core',
+    highlight: 'csharp',
+    fact: "Microsoft's cross-platform framework for web apps and APIs.",
+    code: `var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello, World!");
+app.Run();`,
+  },
+  {
+    id: 'fw-gin',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Gin',
+    highlight: 'go',
+    fact: 'A fast HTTP web framework for Go with a martini-like API.',
+    code: `package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
+	r.Run()
+}`,
+  },
+  {
+    id: 'fw-bootstrap',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Bootstrap',
+    highlight: 'html',
+    fact: 'The grid-and-component CSS framework originally built at Twitter.',
+    code: `<div class="container">
+  <button type="button" class="btn btn-primary">
+    Save
+  </button>
+  <div class="alert alert-success" role="alert">
+    Saved!
+  </div>
+</div>`,
+  },
+  {
+    id: 'fw-tensorflow',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'TensorFlow',
+    highlight: 'python',
+    fact: "Google's end-to-end machine-learning platform.",
+    code: `import tensorflow as tf
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(64, activation="relu"),
+    tf.keras.layers.Dense(10, activation="softmax"),
+])
+model.compile(optimizer="adam", loss="categorical_crossentropy")`,
+  },
+  {
+    id: 'fw-pandas',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'pandas',
+    highlight: 'python',
+    fact: "The go-to Python library for data analysis; named after 'panel data'.",
+    code: `import pandas as pd
+
+df = pd.read_csv("sales.csv")
+totals = df.groupby("region")["amount"].sum()
+print(totals.sort_values(ascending=False))`,
+  },
+  {
+    id: 'fw-swiftui',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'SwiftUI',
+    highlight: 'swift',
+    fact: "Apple's declarative UI framework, announced in 2019.",
+    code: `struct ContentView: View {
+    var body: some View {
+        VStack {
+            Text("Hello, SwiftUI!")
+            Button("Tap me") { print("tapped") }
+        }
+    }
+}`,
+  },
+  {
+    id: 'fw-compose',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Jetpack Compose',
+    highlight: 'kotlin',
+    fact: "Android's modern declarative UI toolkit, written in Kotlin.",
+    code: `@Composable
+fun Greeting(name: String) {
+    Column {
+        Text(text = "Hello, $name!")
+        Button(onClick = { }) { Text("Click") }
+    }
+}`,
+  },
+  {
+    id: 'fw-threejs',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Three.js',
+    highlight: 'javascript',
+    fact: 'The most popular library for 3D graphics in the browser via WebGL.',
+    code: `const scene = new THREE.Scene();
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);`,
+  },
+  {
+    id: 'fw-actix',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Actix',
+    highlight: 'rust',
+    fact: 'A powerful, high-performance web framework for Rust.',
+    code: `use actix_web::{get, App, HttpServer, Responder};
+
+#[get("/")]
+async fn hello() -> impl Responder {
+    "Hello, world!"
+}`,
+  },
+  {
+    id: 'fw-electron',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Electron',
+    highlight: 'javascript',
+    fact: 'Builds desktop apps with web tech; powers VS Code, Slack, and Discord.',
+    code: `const { app, BrowserWindow } = require('electron');
+
+app.whenReady().then(() => {
+  const win = new BrowserWindow({ width: 800, height: 600 });
+  win.loadFile('index.html');
+});`,
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -857,6 +1201,22 @@ const companies: RawQuestion[] = [
   { id: 'co-notion', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Notion', slug: 'notion', color: '#f0f6fc', fact: 'An all-in-one workspace for notes, docs, and databases.' },
   { id: 'co-atlassian', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Atlassian', slug: 'atlassian', color: '#0052CC', fact: 'The company behind Jira, Confluence, and Bitbucket.' },
   { id: 'co-postman', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Postman', slug: 'postman', color: '#FF6C37', fact: 'The go-to tool for building and testing APIs.' },
+  { id: 'co-vite', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Vite', slug: 'vite', color: '#646CFF', fact: 'A lightning-fast build tool and dev server for modern web apps.' },
+  { id: 'co-webpack', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'webpack', slug: 'webpack', color: '#8DD6F9', fact: 'The module bundler that defined modern JavaScript build pipelines.' },
+  { id: 'co-eslint', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'ESLint', slug: 'eslint', color: '#4B32C3', fact: 'The pluggable linter that keeps JavaScript and TypeScript tidy.' },
+  { id: 'co-prettier', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Prettier', slug: 'prettier', color: '#F7B93E', fact: 'An opinionated code formatter that ends arguments about style.' },
+  { id: 'co-storybook', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Storybook', slug: 'storybook', color: '#FF4785', fact: 'A workshop for building and documenting UI components in isolation.' },
+  { id: 'co-jest', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Jest', slug: 'jest', color: '#C21325', fact: "Meta's 'delightful' JavaScript testing framework." },
+  { id: 'co-cypress', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Cypress', slug: 'cypress', color: '#69D3A7', fact: 'An end-to-end testing tool that runs right inside the browser.' },
+  { id: 'co-prisma', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Prisma', slug: 'prisma', color: '#f0f6fc', fact: 'A next-generation, type-safe ORM for Node.js and TypeScript.' },
+  { id: 'co-ansible', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ansible', slug: 'ansible', color: '#EE0000', fact: "Red Hat's agentless tool for automating configuration and deployment." },
+  { id: 'co-digitalocean', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'DigitalOcean', slug: 'digitalocean', color: '#0080FF', fact: 'Developer-friendly cloud hosting; its mascot is a shark named Sammy.' },
+  { id: 'co-netlify', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Netlify', slug: 'netlify', color: '#00C7B7', fact: 'A platform for deploying static sites and serverless functions.' },
+  { id: 'co-githubactions', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'GitHub Actions', slug: 'githubactions', color: '#2088FF', fact: "GitHub's built-in CI/CD automation platform." },
+  { id: 'co-ubuntu', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ubuntu', slug: 'ubuntu', color: '#E95420', fact: 'The most popular desktop Linux distribution, built by Canonical.' },
+  { id: 'co-firefox', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Firefox', slug: 'firefoxbrowser', color: '#FF7139', fact: "Mozilla's open-source web browser." },
+  { id: 'co-telegram', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Telegram', slug: 'telegram', color: '#26A5E4', fact: 'A cloud-based messaging app with a popular bot API.' },
+  { id: 'co-bun', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Bun', slug: 'bun', color: '#FBF0DF', fact: 'An all-in-one JavaScript runtime and toolkit, built for speed.' },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -973,6 +1333,126 @@ class Program {
         Console.WriteLine(max);
     }
 }`,
+  },
+  {
+    id: 'bug-java-intdiv',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 8',
+    bugLine: 8,
+    highlight: 'java',
+    fact: '`sum / nums.length` is integer division — cast to `(double)` to keep the fraction.',
+    code: `public class Average {
+    public static void main(String[] args) {
+        int[] nums = {2, 5, 6, 8};
+        int sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+        }
+        double avg = sum / nums.length;
+        System.out.println(avg);
+    }
+}`,
+  },
+  {
+    id: 'bug-py-reverse',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 4',
+    bugLine: 4,
+    highlight: 'python',
+    fact: 'On the first pass `items[len(items)]` is out of range — it should be `len(items) - 1 - i`.',
+    code: `def reverse(items):
+    result = []
+    for i in range(len(items)):
+        result.append(items[len(items) - i])
+    return result`,
+  },
+  {
+    id: 'bug-js-varclosure',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 3',
+    bugLine: 3,
+    highlight: 'javascript',
+    fact: '`var i` is function-scoped, so every closure returns 3 — use `let i` for a per-iteration binding.',
+    code: `function makeCounters() {
+  const counters = [];
+  for (var i = 0; i < 3; i++) {
+    counters.push(() => i);
+  }
+  return counters;
+}`,
+  },
+  {
+    id: 'bug-c-bounds',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 5',
+    bugLine: 5,
+    highlight: 'c',
+    fact: '`i <= 3` reads `nums[3]`, one past the end of a 3-element array — use `i < 3`.',
+    code: `#include <stdio.h>
+
+int main(void) {
+    int nums[3] = {1, 2, 3};
+    for (int i = 0; i <= 3; i++) {
+        printf("%d\\n", nums[i]);
+    }
+    return 0;
+}`,
+  },
+  {
+    id: 'bug-rust-init',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 2',
+    bugLine: 2,
+    highlight: 'rust',
+    fact: 'Seeding `largest` with 0 breaks for all-negative inputs — start from `nums[0]` or `i32::MIN`.',
+    code: `fn max(nums: &[i32]) -> i32 {
+    let mut largest = 0;
+    for &n in nums {
+        if n > largest {
+            largest = n;
+        }
+    }
+    largest
+}`,
+  },
+  {
+    id: 'bug-sql-having',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 3',
+    bugLine: 3,
+    highlight: 'sql',
+    fact: "You can't filter an aggregate in `WHERE` — use `HAVING AVG(salary) > 50000` after `GROUP BY`.",
+    code: `SELECT department, AVG(salary) AS avg_pay
+FROM employees
+WHERE avg_pay > 50000
+GROUP BY department;`,
+  },
+  {
+    id: 'bug-ts-optional',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 2',
+    bugLine: 2,
+    highlight: 'typescript',
+    fact: '`name` is optional, so it can be `undefined`; calling `.toUpperCase()` on it throws at runtime.',
+    code: `function greet(name?: string): string {
+  return "Hello, " + name.toUpperCase();
+}
+
+console.log(greet());`,
   },
 ];
 
