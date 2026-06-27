@@ -2,6 +2,7 @@ import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
 import { avatarColor } from '../profile';
 import { socket } from '../socket';
+import { play } from '../sound';
 import type { PublicPlayer, PublicRoom } from '../types';
 import SupportLink from './SupportLink';
 
@@ -21,6 +22,7 @@ export default function Results({ room, playerId, leaderboard, onLeave }: Props)
   const iWon = winner?.id === playerId;
 
   useEffect(() => {
+    play(iWon ? 'win' : 'lose');
     const duration = 1400;
     const end = Date.now() + duration;
     const frame = () => {

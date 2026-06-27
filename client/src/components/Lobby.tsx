@@ -95,7 +95,7 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
             <label>Seconds per round: <strong>{room.settings.roundTime}</strong></label>
             <input
               type="range"
-              min={10}
+              min={5}
               max={60}
               step={5}
               value={room.settings.roundTime}

@@ -184,7 +184,7 @@ export function removePlayer(room: Room, id: string): void {
 
 export function applySettings(room: Room, partial: Partial<RoomSettings>): void {
   const rounds = clamp(partial.rounds ?? room.settings.rounds, 3, 20);
-  const roundTime = clamp(partial.roundTime ?? room.settings.roundTime, 10, 60);
+  const roundTime = clamp(partial.roundTime ?? room.settings.roundTime, 5, 60);
   const requested = (partial.categories ?? []).filter((c) => VALID_CATEGORIES.includes(c));
   const categories = requested.length ? requested : room.settings.categories;
   const progressiveReveal =

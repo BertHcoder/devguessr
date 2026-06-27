@@ -4,6 +4,7 @@ import Home from './components/Home';
 import Lobby from './components/Lobby';
 import ProfileEditor from './components/ProfileEditor';
 import Results from './components/Results';
+import SoundControl from './components/SoundControl';
 import ThemePicker from './components/ThemePicker';
 import { avatarColor, readProfile, recordGameResult, saveProfile } from './profile';
 import { socket } from './socket';
@@ -140,6 +141,7 @@ export default function App() {
               {profile.avatar || (profile.name.trim().charAt(0) || '?').toUpperCase()}
             </span>
           </button>
+          <SoundControl />
           <ThemePicker />
           <span className={`conn ${connected ? 'on' : 'off'}`}>
             {connected ? 'online' : 'connecting…'}

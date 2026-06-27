@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { avatarColor } from '../profile';
 import { socket } from '../socket';
+import { play } from '../sound';
 import type { Category, PublicRoom, RoundResultPayload, RoundStartPayload } from '../types';
 
 interface Props {
@@ -26,6 +27,9 @@ export default function Game({ room, playerId, round, result }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
   const confettiFired = useRef<string | null>(null);
+  // Tracks the last whole second we played a countdown tick for, so each of the
+  // final seconds beeps exactly once.
+  const lastTickRef = useRef<number | null>(null);
   // Locks the answer the instant it is sent. `selected` (React state) updates
   // asynchronously, so without this a fast second click could slip past the
   // `answered` guard and overwrite the choice before the buttons disable.
@@ -39,6 +43,8 @@ export default function Game({ room, playerId, round, result }: Props) {
     setNow(Date.now());
     confettiFired.current = null;
     submittedRef.current = false;
+    lastTickRef.current = null;
+    if (round) play('roundStart');
   }, [round?.index]);
 
   // Tick the countdown until the round is revealed.
@@ -52,11 +58,25 @@ export default function Game({ room, playerId, round, result }: Props) {
   useEffect(() => {
     if (!result || !playerId || !question) return;
     const mine = result.results[playerId];
-    if (mine?.correct && confettiFired.current !== question.id) {
-      confettiFired.current = question.id;
+    if (confettiFired.current === question.id) return;
+    confettiFired.current = question.id;
+    if (mine?.correct) {
+      play('correct');
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 }, disableForReducedMotion: true });
+    } else {
+      play('wrong');
     }
   }, [result, playerId, question]);
+
+  // Beep on each of the final few seconds while the round is still live.
+  useEffect(() => {
+    if (result || !round) return;
+    const secs = Math.ceil(Math.max(0, round.endsAt - now) / 1000);
+    if (secs > 0 && secs <= 5 && lastTickRef.current !== secs) {
+      lastTickRef.current = secs;
+      play('tick');
+    }
+  }, [now, result, round]);
 
   const me = useMemo(() => room.players.find((p) => p.id === playerId), [room.players, playerId]);
   const answered = me?.answered ?? selected !== null;
@@ -87,6 +107,7 @@ export default function Game({ room, playerId, round, result }: Props) {
   const pick = (i: number) => {
     if (submittedRef.current || answered || result) return;
     submittedRef.current = true;
+    play('click');
     setSelected(i);
     socket.emit('answer:submit', { choice: i });
   };

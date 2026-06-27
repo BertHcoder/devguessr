@@ -185,6 +185,37 @@ input { font-family: inherit; }
   box-shadow: inset 0 0 0 1px var(--primary-2);
 }
 
+/* -------------------------------- Sound control --------------------------- */
+.sound-control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.5rem 0.2rem 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+}
+.sound-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+}
+.sound-btn:hover { color: var(--text); transform: translateY(-1px); }
+.sound-btn.muted { color: var(--amber); }
+.sound-slider {
+  width: 72px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
 .content {
   flex: 1;
   width: 100%;
@@ -909,5 +940,8 @@ input { font-family: inherit; }
 
 @media (max-width: 480px) {
   .emoji-grid { grid-template-columns: repeat(6, 1fr); }
+  /* Keep the mute toggle but hide the slider to save topbar space. */
+  .sound-slider { display: none; }
+  .sound-control { padding: 0.2rem; }
 }
 
