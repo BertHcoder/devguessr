@@ -212,12 +212,43 @@ const BAR = BEAT * 4;
 /** Master loudness of the music relative to the SFX volume. */
 const MUSIC_LEVEL = 0.16;
 
-/** Relaxed Am7 – Fmaj7 – Cmaj7 – G7 loop: pad chord, bass root, arpeggio. */
+/** Eight-bar loop: an A section (Am7–Fmaj7–Cmaj7–G7) answered by a contrasting
+ *  B section (Dm7–Am7–Em7–G7) so the harmony keeps moving instead of looping
+ *  every four bars. Each entry carries a pad chord, a bass root, and an
+ *  arpeggio. */
 const PROGRESSION: { pad: number[]; bass: number; arp: number[] }[] = [
   { pad: [220.0, 261.63, 329.63], bass: 110.0, arp: [440.0, 523.25, 659.25, 587.33] }, // Am7
   { pad: [174.61, 220.0, 261.63], bass: 87.31, arp: [349.23, 440.0, 523.25, 440.0] }, // Fmaj7
   { pad: [261.63, 329.63, 392.0], bass: 130.81, arp: [523.25, 659.25, 783.99, 659.25] }, // Cmaj7
   { pad: [196.0, 246.94, 293.66], bass: 98.0, arp: [392.0, 493.88, 587.33, 493.88] }, // G7
+  { pad: [220.0, 293.66, 349.23], bass: 146.83, arp: [440.0, 587.33, 698.46, 587.33] }, // Dm7
+  { pad: [220.0, 261.63, 329.63], bass: 110.0, arp: [523.25, 659.25, 880.0, 659.25] }, // Am7 (higher voicing)
+  { pad: [246.94, 329.63, 392.0], bass: 82.41, arp: [493.88, 659.25, 783.99, 659.25] }, // Em7
+  { pad: [196.0, 246.94, 293.66], bass: 98.0, arp: [392.0, 493.88, 587.33, 698.46] }, // G7 (leading back to Am)
+];
+
+/** Off-beat arpeggio rhythms (in beats) the scheduler rotates through so no two
+ *  consecutive bars share the same groove. */
+const ARP_RHYTHMS: number[][] = [
+  [0, 1.5, 2.5, 3.5],
+  [0, 1, 2, 3.5],
+  [0.5, 1.5, 2.5, 3],
+  [0, 1, 2.5, 3.5],
+];
+
+/** Sparse top-line melody, one phrase per bar. Each accent is `{ beat, note }`
+ *  where `note` indexes into the bar's arpeggio. Empty bars leave breathing
+ *  room so the track stays laid-back, and the phrase offset drifts each time
+ *  through the loop so the melody never repeats identically. */
+const LEAD_PHRASES: { beat: number; note: number }[][] = [
+  [{ beat: 3, note: 3 }],
+  [],
+  [{ beat: 1.5, note: 2 }, { beat: 3, note: 3 }],
+  [],
+  [{ beat: 2, note: 1 }],
+  [{ beat: 0.5, note: 2 }, { beat: 2.5, note: 3 }],
+  [],
+  [{ beat: 1, note: 3 }, { beat: 3, note: 1 }],
 ];
 
 let musicGain: GainNode | null = null;
@@ -266,17 +297,51 @@ function playVoice(
   osc.stop(start + dur + 0.05);
 }
 
-/** Schedule one bar of music (pad + bass + a syncopated arpeggio). */
+/** A soft, bell-like lead note (sine) with a slow swell and a long tail. */
+function playLead(audio: AudioContext, out: AudioNode, freq: number, start: number, dur: number): void {
+  const osc = audio.createOscillator();
+  const gain = audio.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  const peak = 0.12;
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.linearRampToValueAtTime(peak, start + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  osc.connect(gain).connect(out);
+  osc.start(start);
+  osc.stop(start + dur + 0.05);
+}
+
+/** Schedule one bar of music: a sustained pad, a moving bass, a rotating
+ *  arpeggio, and an occasional lead melody — varied per bar so the loop stays
+ *  fresh. */
 function scheduleBar(audio: AudioContext, out: AudioNode, start: number, bar: number): void {
   const chord = PROGRESSION[bar % PROGRESSION.length];
+
+  // Pad: the sustained chord underpinning the whole bar.
   for (const f of chord.pad) playPad(audio, out, f, start, BAR);
+
+  // Bass: root on beat 1, then the root or its octave on beat 3 for gentle
+  // forward motion that alternates bar to bar.
   playVoice(audio, out, chord.bass, start, BEAT * 1.8, 0.3);
-  playVoice(audio, out, chord.bass, start + BEAT * 2, BEAT * 1.8, 0.3);
-  // Gentle off-beat arpeggio for a laid-back feel.
-  const offsets = [0, 1.5, 2.5, 3.5];
-  chord.arp.forEach((f, i) => {
-    playVoice(audio, out, f, start + offsets[i] * BEAT, BEAT * 0.9, 0.15);
+  const beat3Bass = bar % 2 === 0 ? chord.bass : chord.bass * 2;
+  playVoice(audio, out, beat3Bass, start + BEAT * 2, BEAT * 1.8, 0.3);
+
+  // Arpeggio: rotate the off-beat rhythm and flip direction on odd bars so no
+  // two consecutive bars play the same figure.
+  const rhythm = ARP_RHYTHMS[bar % ARP_RHYTHMS.length];
+  const notes = bar % 2 === 1 ? [...chord.arp].reverse() : chord.arp;
+  notes.forEach((f, i) => {
+    playVoice(audio, out, f, start + rhythm[i] * BEAT, BEAT * 0.9, 0.15);
   });
+
+  // Lead: a sparse top-line melody whose phrase drifts each loop, leaving plenty
+  // of space so the track stays relaxed.
+  const loop = Math.floor(bar / PROGRESSION.length);
+  const phrase = LEAD_PHRASES[(bar + loop) % LEAD_PHRASES.length];
+  for (const { beat, note } of phrase) {
+    playLead(audio, out, chord.arp[note], start + beat * BEAT, BEAT * 1.6);
+  }
 }
 
 /** Look-ahead scheduler: queues bars a little before they are due. */
