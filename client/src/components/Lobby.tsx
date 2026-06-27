@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { avatarColor } from '../profile';
 import { socket } from '../socket';
 import type { Category, PublicRoom } from '../types';
+import MiniGame from './MiniGame';
 
 interface Props {
   room: PublicRoom;
@@ -141,6 +142,8 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
           </div>
         </div>
       </div>
+
+      <MiniGame />
 
       <div className="lobby-actions">
         {isHost ? (
