@@ -26,6 +26,10 @@ export default function Game({ room, playerId, round, result }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
   const confettiFired = useRef<string | null>(null);
+  // Locks the answer the instant it is sent. `selected` (React state) updates
+  // asynchronously, so without this a fast second click could slip past the
+  // `answered` guard and overwrite the choice before the buttons disable.
+  const submittedRef = useRef(false);
 
   const question = round?.question ?? null;
 
@@ -34,6 +38,7 @@ export default function Game({ room, playerId, round, result }: Props) {
     setSelected(null);
     setNow(Date.now());
     confettiFired.current = null;
+    submittedRef.current = false;
   }, [round?.index]);
 
   // Tick the countdown until the round is revealed.
@@ -80,15 +85,23 @@ export default function Game({ room, playerId, round, result }: Props) {
     isBug && result ? Number(String(result.answer).replace(/\D+/g, '')) || null : null;
 
   const pick = (i: number) => {
-    if (answered || result) return;
+    if (submittedRef.current || answered || result) return;
+    submittedRef.current = true;
     setSelected(i);
     socket.emit('answer:submit', { choice: i });
   };
 
+  // The option this player actually locked in. After the reveal we trust the
+  // server-recorded choice so the highlight always matches what was scored —
+  // a local `selected` can diverge if a stray click lands or the pick arrives
+  // just as the round ends (in which case the server records no answer).
+  const myChoice =
+    result && playerId ? result.results[playerId]?.choice ?? null : selected;
+
   const optionState = (i: number): 'idle' | 'selected' | 'correct' | 'wrong' => {
     if (result) {
       if (i === result.correctIndex) return 'correct';
-      if (i === selected) return 'wrong';
+      if (i === myChoice) return 'wrong';
       return 'idle';
     }
     return i === selected ? 'selected' : 'idle';
