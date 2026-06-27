@@ -3,7 +3,7 @@
 [devGuessr](https://devguessr.onrender.com/)
 
 A **guess game for developers**. Each round shows you something visual a syntax-highlighted
-code snippet or a mystery brand logo — and you race your friends to guess the right answer
+code snippet or a mystery brand logo and you race your friends to guess the right answer
 across three categories:
 
 - **`</>` Language** name the programming language from a code snippet
@@ -40,7 +40,7 @@ npm run dev        # starts the server (:3001) and client (:5173) together
 ```
 
 Then open **http://localhost:5173**. To play with others on your network, share your
-machine's LAN URL (Vite prints it) — they connect to the same server.
+machine's LAN URL (Vite prints it) they connect to the same server.
 
 > The client talks to the server at `http://localhost:3001` by default. Override with a
 > `VITE_SERVER_URL` env var when deploying.
@@ -56,7 +56,7 @@ machine's LAN URL (Vite prints it) — they connect to the same server.
 ## Adding questions
 
 All content lives in [`server/src/gameData.ts`](server/src/gameData.ts). Add an entry to the
-`languages`, `frameworks`, or `companies` arrays — multiple-choice options are generated
+`languages`, `frameworks`, or `companies` arrays multiple-choice options are generated
 automatically from each category's answer pool. Company logos use a
 [Simple Icons](https://simpleicons.org) `slug`.
 
