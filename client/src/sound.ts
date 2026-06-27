@@ -17,6 +17,7 @@ export type SoundName =
 
 const VOLUME_KEY = 'devguessr:sound:volume';
 const MUTED_KEY = 'devguessr:sound:muted';
+const MUSIC_KEY = 'devguessr:sound:music';
 
 const DEFAULT_VOLUME = 0.6;
 
@@ -45,8 +46,17 @@ function readMuted(): boolean {
   }
 }
 
+function readMusicEnabled(): boolean {
+  try {
+    return localStorage.getItem(MUSIC_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 let volume = readVolume();
 let muted = readMuted();
+let musicEnabled = readMusicEnabled();
 let ctx: AudioContext | null = null;
 
 type AudioContextCtor = typeof AudioContext;
@@ -82,6 +92,7 @@ export function setVolume(v: number): void {
   } catch {
     /* ignore persistence errors */
   }
+  refreshMusic();
 }
 
 export function setMuted(m: boolean): void {
@@ -93,6 +104,7 @@ export function setMuted(m: boolean): void {
   }
   // Warm up the audio context when sound is (re-)enabled.
   if (!m) getCtx();
+  refreshMusic();
 }
 
 /** A single tone in a sound effect. Times are seconds relative to playback start. */
@@ -180,9 +192,157 @@ export function play(name: SoundName): void {
 if (typeof window !== 'undefined') {
   const prime = () => {
     getCtx();
+    // Resume background music if it was left on in a previous session.
+    refreshMusic();
     window.removeEventListener('pointerdown', prime);
     window.removeEventListener('keydown', prime);
   };
   window.addEventListener('pointerdown', prime, { once: true });
   window.addEventListener('keydown', prime, { once: true });
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Background music — a gentle, looping lo-fi backing track synthesized on    */
+/*  the fly. No audio files to ship; it sits quietly under the sound effects.  */
+/* -------------------------------------------------------------------------- */
+
+const TEMPO = 72; // beats per minute — relaxed
+const BEAT = 60 / TEMPO;
+const BAR = BEAT * 4;
+/** Master loudness of the music relative to the SFX volume. */
+const MUSIC_LEVEL = 0.16;
+
+/** Relaxed Am7 – Fmaj7 – Cmaj7 – G7 loop: pad chord, bass root, arpeggio. */
+const PROGRESSION: { pad: number[]; bass: number; arp: number[] }[] = [
+  { pad: [220.0, 261.63, 329.63], bass: 110.0, arp: [440.0, 523.25, 659.25, 587.33] }, // Am7
+  { pad: [174.61, 220.0, 261.63], bass: 87.31, arp: [349.23, 440.0, 523.25, 440.0] }, // Fmaj7
+  { pad: [261.63, 329.63, 392.0], bass: 130.81, arp: [523.25, 659.25, 783.99, 659.25] }, // Cmaj7
+  { pad: [196.0, 246.94, 293.66], bass: 98.0, arp: [392.0, 493.88, 587.33, 493.88] }, // G7
+];
+
+let musicGain: GainNode | null = null;
+let musicTimer: ReturnType<typeof setTimeout> | null = null;
+let musicBar = 0;
+let nextBarTime = 0;
+
+function musicTarget(): number {
+  return muted ? 0 : volume * MUSIC_LEVEL;
+}
+
+/** A long, soft pad voice (sine) that swells in and fades out across the bar. */
+function playPad(audio: AudioContext, out: AudioNode, freq: number, start: number, dur: number): void {
+  const osc = audio.createOscillator();
+  const gain = audio.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  const peak = 0.18;
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.linearRampToValueAtTime(peak, start + 0.6);
+  gain.gain.setValueAtTime(peak, start + dur - 0.5);
+  gain.gain.linearRampToValueAtTime(0.0001, start + dur);
+  osc.connect(gain).connect(out);
+  osc.start(start);
+  osc.stop(start + dur + 0.05);
+}
+
+/** A short, soft plucked/bass note (triangle) with a quick decay. */
+function playVoice(
+  audio: AudioContext,
+  out: AudioNode,
+  freq: number,
+  start: number,
+  dur: number,
+  peak: number,
+): void {
+  const osc = audio.createOscillator();
+  const gain = audio.createGain();
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.linearRampToValueAtTime(peak, start + 0.025);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  osc.connect(gain).connect(out);
+  osc.start(start);
+  osc.stop(start + dur + 0.05);
+}
+
+/** Schedule one bar of music (pad + bass + a syncopated arpeggio). */
+function scheduleBar(audio: AudioContext, out: AudioNode, start: number, bar: number): void {
+  const chord = PROGRESSION[bar % PROGRESSION.length];
+  for (const f of chord.pad) playPad(audio, out, f, start, BAR);
+  playVoice(audio, out, chord.bass, start, BEAT * 1.8, 0.3);
+  playVoice(audio, out, chord.bass, start + BEAT * 2, BEAT * 1.8, 0.3);
+  // Gentle off-beat arpeggio for a laid-back feel.
+  const offsets = [0, 1.5, 2.5, 3.5];
+  chord.arp.forEach((f, i) => {
+    playVoice(audio, out, f, start + offsets[i] * BEAT, BEAT * 0.9, 0.15);
+  });
+}
+
+/** Look-ahead scheduler: queues bars a little before they are due. */
+function scheduleLoop(): void {
+  if (!ctx || !musicGain) return;
+  while (nextBarTime < ctx.currentTime + 0.4) {
+    scheduleBar(ctx, musicGain, nextBarTime, musicBar);
+    nextBarTime += BAR;
+    musicBar += 1;
+  }
+  musicTimer = setTimeout(scheduleLoop, 60);
+}
+
+function ensureMusicRunning(): void {
+  const audio = getCtx();
+  if (!audio) return;
+  if (!musicGain) {
+    musicGain = audio.createGain();
+    musicGain.gain.value = 0.0001;
+    musicGain.connect(audio.destination);
+  }
+  if (musicTimer != null) return; // already running
+  musicBar = 0;
+  nextBarTime = audio.currentTime + 0.15;
+  scheduleLoop();
+}
+
+function stopMusic(): void {
+  if (musicTimer != null) {
+    clearTimeout(musicTimer);
+    musicTimer = null;
+  }
+  if (musicGain && ctx) {
+    const t = ctx.currentTime;
+    musicGain.gain.cancelScheduledValues(t);
+    musicGain.gain.setValueAtTime(Math.max(0.0001, musicGain.gain.value), t);
+    musicGain.gain.linearRampToValueAtTime(0.0001, t + 0.3);
+  }
+}
+
+/** Start or stop the music to match the current enabled / mute / volume state. */
+function refreshMusic(): void {
+  const shouldPlay = musicEnabled && !muted && volume > 0;
+  if (!shouldPlay) {
+    stopMusic();
+    return;
+  }
+  ensureMusicRunning();
+  if (musicGain && ctx) {
+    const t = ctx.currentTime;
+    musicGain.gain.cancelScheduledValues(t);
+    musicGain.gain.setTargetAtTime(musicTarget(), t, 0.1);
+  }
+}
+
+export function isMusicEnabled(): boolean {
+  return musicEnabled;
+}
+
+export function setMusicEnabled(enabled: boolean): void {
+  musicEnabled = enabled;
+  try {
+    localStorage.setItem(MUSIC_KEY, enabled ? '1' : '0');
+  } catch {
+    /* ignore persistence errors */
+  }
+  refreshMusic();
+}
+
