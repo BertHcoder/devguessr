@@ -1,8 +1,8 @@
 # DevGuessr 🎮
 
-[liveUrl](https://devguessr.onrender.com/)
+[devGuessr](https://devguessr.onrender.com/)
 
-A **GeoGuessr for developers**. Each round shows you something visual — a syntax-highlighted
+A **guess game for developers**. Each round shows you something visual a syntax-highlighted
 code snippet or a mystery brand logo — and you race your friends to guess the right answer
 across three categories:
 
@@ -20,8 +20,8 @@ You can also play **solo** (just start a room by yourself) to practice.
 
 ## Tech stack
 
-- **Client** — Vite + React + TypeScript, `react-syntax-highlighter`, `canvas-confetti`
-- **Server** — Node.js + Express + Socket.IO (authoritative round timers & scoring)
+- **Client** Vite + React + TypeScript, `react-syntax-highlighter`, `canvas-confetti`
+- **Server** Node.js + Express + Socket.IO (authoritative round timers & scoring)
 - Logos rendered via the [Simple Icons](https://simpleicons.org) CDN
 
 ```
