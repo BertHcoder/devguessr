@@ -1,5 +1,7 @@
 # DevGuessr 🎮
 
+[liveUrl](https://devguessr.onrender.com/)
+
 A **GeoGuessr for developers**. Each round shows you something visual — a syntax-highlighted
 code snippet or a mystery brand logo — and you race your friends to guess the right answer
 across three categories:
