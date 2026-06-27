@@ -70,6 +70,10 @@ export interface Player {
   color: string;
   /** Short status line. */
   tagline: string;
+  /** True while a one-shot streak shield (a power-up) is armed for this round. */
+  shield: boolean;
+  /** Power-up types already used this round (prevents reuse). */
+  usedPowerups: string[];
 }
 
 export type RoomStatus = 'lobby' | 'playing' | 'reveal' | 'over';
@@ -80,6 +84,8 @@ export interface RoomSettings {
   categories: Category[];
   /** When true, code/logos start obscured and sharpen as the round timer runs. */
   progressiveReveal: boolean;
+  /** When true, players can spend earned points on power-ups during a round. */
+  powerUps: boolean;
 }
 
 export interface Room {
@@ -112,6 +118,7 @@ export interface PublicPlayer {
   favTech?: string;
   color?: string;
   tagline?: string;
+  shield?: boolean;
 }
 
 export interface PublicRoom {

@@ -20,11 +20,14 @@ import {
   toPublicQuestion,
   toPublicRoom,
   updatePlayerProfile,
+  usePowerup,
 } from './rooms.js';
+import type { PowerupType } from './rooms.js';
 import type { PlayerProfile, Room, RoomSettings } from './types.js';
 
 const PORT = Number(process.env.PORT) || 3001;
 const REVEAL_MS = 5000;
+const SMOKE_MS = 4000;
 
 const app = express();
 app.use(cors());
@@ -175,6 +178,26 @@ io.on('connection', (socket) => {
     if (allAnswered(room)) endRound(room);
   });
 
+  socket.on(
+    'powerup:use',
+    (
+      payload: { type: PowerupType },
+      ack?: (res: { ok: boolean; error?: string; type?: PowerupType; hiddenIndices?: number[] }) => void,
+    ) => {
+      const room = getRoom(socketRoom.get(socket.id) ?? '');
+      if (!room) return ack?.({ ok: false, error: 'No room.' });
+      const res = usePowerup(room, socket.id, payload?.type);
+      if (res.ok) {
+        if (res.type === 'smoke') {
+          const fromName = room.players.get(socket.id)?.name ?? 'Someone';
+          socket.to(room.code).emit('powerup:smoked', { fromName, durationMs: SMOKE_MS });
+        }
+        broadcastRoom(room);
+      }
+      ack?.(res);
+    },
+  );
+
   socket.on('game:restart', () => {
     const room = getRoom(socketRoom.get(socket.id) ?? '');
     if (!room || room.hostId !== socket.id) return;
@@ -191,6 +214,8 @@ io.on('connection', (socket) => {
       p.lastPoints = 0;
       p.answered = false;
       p.choice = null;
+      p.shield = false;
+      p.usedPowerups = [];
     }
     broadcastRoom(room);
   });

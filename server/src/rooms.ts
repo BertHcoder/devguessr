@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS: RoomSettings = {
   roundTime: 20,
   categories: ['language', 'framework', 'company', 'bug'],
   progressiveReveal: true,
+  powerUps: false,
 };
 
 const VALID_CATEGORIES: Category[] = ['language', 'framework', 'company', 'bug'];
@@ -143,6 +144,8 @@ export function addPlayer(room: Room, id: string, name: string, profile?: Partia
     favTech: prof.favTech,
     color: prof.color,
     tagline: prof.tagline,
+    shield: false,
+    usedPowerups: [],
   };
   room.players.set(id, player);
   if (isHost) room.hostId = id;
@@ -189,7 +192,8 @@ export function applySettings(room: Room, partial: Partial<RoomSettings>): void 
   const categories = requested.length ? requested : room.settings.categories;
   const progressiveReveal =
     partial.progressiveReveal ?? room.settings.progressiveReveal;
-  room.settings = { rounds, roundTime, categories, progressiveReveal };
+  const powerUps = partial.powerUps ?? room.settings.powerUps;
+  room.settings = { rounds, roundTime, categories, progressiveReveal, powerUps };
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -226,6 +230,8 @@ export function beginRound(room: Room): boolean {
     p.answered = false;
     p.choice = null;
     p.lastPoints = 0;
+    p.shield = false;
+    p.usedPowerups = [];
   }
   room.status = 'playing';
   room.endsAt = Date.now() + room.settings.roundTime * 1000;
@@ -260,10 +266,67 @@ export function submitAnswer(room: Room, playerId: string, choice: number): bool
     player.lastPoints = base + streakBonus;
     player.score += player.lastPoints;
   } else {
-    player.streak = 0;
+    // A one-shot shield (a power-up) protects the streak from a single miss.
+    if (player.shield) {
+      player.shield = false;
+    } else {
+      player.streak = 0;
+    }
     player.lastPoints = 0;
   }
   return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Power-ups (optional economy: spend earned points for an edge).             */
+/* -------------------------------------------------------------------------- */
+
+export type PowerupType = 'fifty' | 'shield' | 'smoke';
+
+export const POWERUP_COSTS: Record<PowerupType, number> = {
+  fifty: 150,
+  shield: 200,
+  smoke: 250,
+};
+
+export interface PowerupResult {
+  ok: boolean;
+  error?: string;
+  type?: PowerupType;
+  /** For `fifty`: option indices the player should remove from their board. */
+  hiddenIndices?: number[];
+}
+
+/**
+ * Spend points on a power-up. Server-authoritative: validates affordability and
+ * one-use-per-round, deducts the cost, and applies the effect. `smoke` only
+ * deducts/marks here — broadcasting the blur to opponents is the caller's job.
+ */
+export function usePowerup(room: Room, playerId: string, type: PowerupType): PowerupResult {
+  const player = room.players.get(playerId);
+  const q = currentQuestion(room);
+  if (!room.settings.powerUps) return { ok: false, error: 'Power-ups are off.' };
+  if (!player || !q || room.status !== 'playing') return { ok: false, error: 'Not available right now.' };
+  if (type !== 'fifty' && type !== 'shield' && type !== 'smoke') return { ok: false, error: 'Unknown power-up.' };
+  if (player.usedPowerups.includes(type)) return { ok: false, error: 'Already used this round.' };
+  if ((type === 'fifty' || type === 'shield') && player.answered) {
+    return { ok: false, error: 'You already answered.' };
+  }
+  const cost = POWERUP_COSTS[type];
+  if (player.score < cost) return { ok: false, error: 'Not enough points.' };
+
+  player.score -= cost;
+  player.usedPowerups.push(type);
+
+  if (type === 'fifty') {
+    const correctIndex = q.options.indexOf(q.answer);
+    const wrong = q.options.map((_, i) => i).filter((i) => i !== correctIndex);
+    return { ok: true, type, hiddenIndices: shuffle(wrong).slice(0, 2) };
+  }
+  if (type === 'shield') {
+    player.shield = true;
+  }
+  return { ok: true, type };
 }
 
 export function allAnswered(room: Room): boolean {
@@ -289,6 +352,7 @@ export function toPublicPlayer(p: Player): PublicPlayer {
     favTech: p.favTech,
     color: p.color,
     tagline: p.tagline,
+    shield: p.shield,
   };
 }
 

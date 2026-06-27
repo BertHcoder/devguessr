@@ -140,6 +140,24 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
               Snippets &amp; logos start obscured and sharpen as the timer runs guess early for more points.
             </span>
           </div>
+
+          <div className="setting">
+            <label>Power-ups</label>
+            <button
+              type="button"
+              className={`toggle ${room.settings.powerUps ? 'on' : ''}`}
+              role="switch"
+              aria-checked={room.settings.powerUps}
+              disabled={!isHost}
+              onClick={() => updateSettings({ powerUps: !room.settings.powerUps })}
+            >
+              <span className="toggle-knob" />
+              {room.settings.powerUps ? 'On' : 'Off'}
+            </button>
+            <span className="setting-hint">
+              Spend earned points mid-round on 50/50, a streak shield, or a smoke bomb that blurs rivals.
+            </span>
+          </div>
         </div>
       </div>
 

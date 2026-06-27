@@ -23,9 +23,20 @@ const CATEGORY_LABEL: Record<Category, string> = {
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+/** Optional power-ups. Costs mirror POWERUP_COSTS on the server. */
+const POWERUPS = [
+  { type: 'fifty' as const, icon: '½', label: '50/50', cost: 150, preAnswer: true, desc: 'Remove two wrong options' },
+  { type: 'shield' as const, icon: '🛡', label: 'Shield', cost: 200, preAnswer: true, desc: 'Protect your streak from one miss' },
+  { type: 'smoke' as const, icon: '💨', label: 'Smoke', cost: 250, preAnswer: false, desc: "Blur every rival's screen" },
+];
+
 export default function Game({ room, playerId, round, result }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [hidden, setHidden] = useState<number[]>([]);
+  const [used, setUsed] = useState<string[]>([]);
+  const [smokeUntil, setSmokeUntil] = useState(0);
+  const [smokeFrom, setSmokeFrom] = useState('');
   const confettiFired = useRef<string | null>(null);
   // Tracks the last whole second we played a countdown tick for, so each of the
   // final seconds beeps exactly once.
@@ -41,11 +52,27 @@ export default function Game({ room, playerId, round, result }: Props) {
   useEffect(() => {
     setSelected(null);
     setNow(Date.now());
+    setHidden([]);
+    setUsed([]);
+    setSmokeUntil(0);
     confettiFired.current = null;
     submittedRef.current = false;
     lastTickRef.current = null;
     if (round) play('roundStart');
   }, [round?.index]);
+
+  // React to a rival's smoke bomb: blur our own stage for a few seconds.
+  useEffect(() => {
+    const onSmoked = (p: { fromName: string; durationMs: number }) => {
+      setSmokeFrom(p.fromName);
+      setSmokeUntil(Date.now() + p.durationMs);
+      play('wrong');
+    };
+    socket.on('powerup:smoked', onSmoked);
+    return () => {
+      socket.off('powerup:smoked', onSmoked);
+    };
+  }, []);
 
   // Tick the countdown until the round is revealed.
   useEffect(() => {
@@ -99,6 +126,12 @@ export default function Game({ room, playerId, round, result }: Props) {
       : 0;
   const codeBlur = obscure * 6;
 
+  // Power-ups: when sabotaged by a rival's smoke bomb our stage blurs and
+  // shakes for a few seconds, on top of any progressive-reveal blur.
+  const powerUps = room.settings.powerUps;
+  const smoked = !result && now < smokeUntil;
+  const codeFilter = codeBlur + (smoked ? 7 : 0);
+
   // "Spot the bug" rounds number every line and highlight the culprit on reveal.
   const isBug = question.category === 'bug';
   const revealedBugLine =
@@ -110,6 +143,20 @@ export default function Game({ room, playerId, round, result }: Props) {
     play('click');
     setSelected(i);
     socket.emit('answer:submit', { choice: i });
+  };
+
+  const buyPowerup = (type: 'fifty' | 'shield' | 'smoke') => {
+    if (used.includes(type)) return;
+    socket.emit(
+      'powerup:use',
+      { type },
+      (res: { ok: boolean; type?: string; hiddenIndices?: number[] }) => {
+        if (!res?.ok) return;
+        setUsed((u) => (u.includes(type) ? u : [...u, type]));
+        if (type === 'fifty' && res.hiddenIndices) setHidden(res.hiddenIndices);
+        play('click');
+      },
+    );
   };
 
   // The option this player actually locked in. After the reveal we trust the
@@ -149,7 +196,11 @@ export default function Game({ room, playerId, round, result }: Props) {
           <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
         </div>
 
-        <div className="stage">
+        {smoked && (
+          <div className="smoke-banner">💨 {smokeFrom || 'A rival'} set off a smoke bomb!</div>
+        )}
+
+        <div className={`stage ${smoked ? 'smoked' : ''}`}>
           {question.type === 'code' ? (
             <SyntaxHighlighter
               language={question.highlight || 'text'}
@@ -168,7 +219,7 @@ export default function Game({ room, playerId, round, result }: Props) {
                 fontSize: '0.95rem',
                 background: '#1c160f',
                 maxHeight: '46vh',
-                filter: codeBlur ? `blur(${codeBlur.toFixed(1)}px)` : undefined,
+                filter: codeFilter ? `blur(${codeFilter.toFixed(1)}px)` : undefined,
                 transition: 'filter 0.18s linear',
               }}
               wrapLongLines={!isBug}
@@ -181,18 +232,42 @@ export default function Game({ room, playerId, round, result }: Props) {
               revealed={!!result}
               color={question.color ?? '#f6ecdd'}
               obscure={obscure}
+              extraBlur={smoked ? 7 : 0}
             />
           )}
         </div>
 
+        {powerUps && !result && (
+          <div className="powerups">
+            {POWERUPS.map((pu) => {
+              const isUsed = used.includes(pu.type);
+              const disabled = isUsed || (me?.score ?? 0) < pu.cost || (pu.preAnswer && answered);
+              return (
+                <button
+                  key={pu.type}
+                  className={`powerup ${isUsed ? 'used' : ''}`}
+                  disabled={disabled}
+                  onClick={() => buyPowerup(pu.type)}
+                  title={pu.desc}
+                >
+                  <span className="pu-icon">{pu.icon}</span>
+                  <span className="pu-label">{pu.label}</span>
+                  <span className="pu-cost">−{pu.cost}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <div className="options">
           {question.options.map((opt, i) => {
             const state = optionState(i);
+            const eliminated = !result && hidden.includes(i);
             return (
               <button
                 key={opt}
-                className={`option option-${state}`}
-                disabled={answered || !!result}
+                className={`option option-${state} ${eliminated ? 'option-eliminated' : ''}`}
+                disabled={answered || !!result || eliminated}
                 onClick={() => pick(i)}
               >
                 <span className="option-key">{OPTION_KEYS[i]}</span>
@@ -237,6 +312,7 @@ export default function Game({ room, playerId, round, result }: Props) {
               <span className="score-name">
                 {p.name}
                 {p.streak >= 2 && <span className="streak" title={`${p.streak} in a row`}>🔥{p.streak}</span>}
+                {p.shield && <span className="shield-badge" title="Streak shield active">🛡</span>}
               </span>
               <span className="score-pts">
                 {p.score}
@@ -251,7 +327,7 @@ export default function Game({ room, playerId, round, result }: Props) {
   );
 }
 
-function LogoStage({ slug, revealed, color, obscure }: { slug: string; revealed: boolean; color: string; obscure: number }) {
+function LogoStage({ slug, revealed, color, obscure, extraBlur = 0 }: { slug: string; revealed: boolean; color: string; obscure: number; extraBlur?: number }) {
   // During play the logo is shown as a neutral silhouette; the real brand
   // color is revealed once the round ends. With progressive reveal enabled it
   // also starts zoomed-in and blurred, easing out as the timer runs.
@@ -260,9 +336,10 @@ function LogoStage({ slug, revealed, color, obscure }: { slug: string; revealed:
 
   const hex = (revealed ? color : '#c2b4a0').replace('#', '');
   const src = `https://cdn.simpleicons.org/${slug}/${hex}`;
+  const totalBlur = obscure * 12 + extraBlur;
   const obscureStyle =
-    obscure > 0
-      ? { filter: `blur(${(obscure * 12).toFixed(1)}px)`, transform: `scale(${(1 + obscure * 0.7).toFixed(2)})` }
+    totalBlur > 0
+      ? { filter: `blur(${totalBlur.toFixed(1)}px)`, transform: `scale(${(1 + obscure * 0.7).toFixed(2)})` }
       : undefined;
   return (
     <div className={`logo-stage ${revealed ? 'revealed' : ''}`}>

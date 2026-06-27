@@ -7,6 +7,7 @@ export interface RoomSettings {
   roundTime: number;
   categories: Category[];
   progressiveReveal: boolean;
+  powerUps: boolean;
 }
 
 /** Optional, player-customizable profile sent when joining and editable in the lobby. */
@@ -35,6 +36,7 @@ export interface PublicPlayer {
   favTech?: string;
   color?: string;
   tagline?: string;
+  shield?: boolean;
 }
 
 export interface PublicRoom {
