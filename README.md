@@ -6,9 +6,9 @@ A **guess game for developers**. Each round shows you something visual a syntax-
 code snippet or a mystery brand logo — and you race your friends to guess the right answer
 across three categories:
 
-- **`</>` Language** — name the programming language from a code snippet
-- **`⚙` Framework** — identify the framework/library from characteristic code
-- **`★` Company** — unmask the company/brand from its logo silhouette
+- **`</>` Language** name the programming language from a code snippet
+- **`⚙` Framework** identify the framework/library from characteristic code
+- **`★` Company** unmask the company/brand from its logo silhouette
 
 Points reward both **accuracy and speed**, with **streak bonuses** for consecutive correct
 answers, live standings, confetti, and a final podium.
