@@ -1,5 +1,5 @@
-export type Category = 'language' | 'framework' | 'company' | 'bug';
-export type QuestionType = 'code' | 'logo';
+export type Category = 'language' | 'framework' | 'company' | 'bug' | 'funny';
+export type QuestionType = 'code' | 'logo' | 'text';
 export type RoomStatus = 'lobby' | 'playing' | 'reveal' | 'over';
 
 export interface RoomSettings {

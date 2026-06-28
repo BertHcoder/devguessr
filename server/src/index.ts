@@ -27,7 +27,7 @@ import type { PlayerProfile, Room, RoomSettings } from './types.js';
 
 const PORT = Number(process.env.PORT) || 3001;
 const REVEAL_MS = 5000;
-const SMOKE_MS = 4000;
+const SMOKE_MS = 6000;
 
 const app = express();
 app.use(cors());

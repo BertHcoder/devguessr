@@ -19,12 +19,12 @@ const rooms = new Map<string, Room>();
 export const DEFAULT_SETTINGS: RoomSettings = {
   rounds: 8,
   roundTime: 20,
-  categories: ['language', 'framework', 'company', 'bug'],
+  categories: ['language', 'framework', 'company', 'bug', 'funny'],
   progressiveReveal: true,
   powerUps: false,
 };
 
-const VALID_CATEGORIES: Category[] = ['language', 'framework', 'company', 'bug'];
+const VALID_CATEGORIES: Category[] = ['language', 'framework', 'company', 'bug', 'funny'];
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -284,9 +284,9 @@ export function submitAnswer(room: Room, playerId: string, choice: number): bool
 export type PowerupType = 'fifty' | 'shield' | 'smoke';
 
 export const POWERUP_COSTS: Record<PowerupType, number> = {
-  fifty: 150,
-  shield: 200,
-  smoke: 250,
+  fifty: 120,
+  shield: 175,
+  smoke: 200,
 };
 
 export interface PowerupResult {

@@ -19,16 +19,24 @@ const CATEGORY_LABEL: Record<Category, string> = {
   framework: 'Guess the framework',
   company: 'Guess the company',
   bug: 'Spot the bug',
+  funny: 'Name the ritual',
 };
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 /** Optional power-ups. Costs mirror POWERUP_COSTS on the server. */
 const POWERUPS = [
-  { type: 'fifty' as const, icon: '½', label: '50/50', cost: 150, preAnswer: true, desc: 'Remove two wrong options' },
-  { type: 'shield' as const, icon: '🛡', label: 'Shield', cost: 200, preAnswer: true, desc: 'Protect your streak from one miss' },
-  { type: 'smoke' as const, icon: '💨', label: 'Smoke', cost: 250, preAnswer: false, desc: "Blur every rival's screen" },
+  { type: 'fifty' as const, icon: '½', label: '50/50', cost: 120, preAnswer: true, desc: 'Remove two wrong options' },
+  { type: 'shield' as const, icon: '🛡', label: 'Shield', cost: 175, preAnswer: true, desc: 'Protect your streak from one miss' },
+  { type: 'smoke' as const, icon: '💨', label: 'Smoke', cost: 200, preAnswer: false, desc: "Blur every rival's screen" },
 ];
+
+/** Confirmation shown to the activating player the moment a power-up fires. */
+const POWERUP_FLASH: Record<'fifty' | 'shield' | 'smoke', { icon: string; text: string }> = {
+  fifty: { icon: '½', text: '50/50 — two wrong answers removed' },
+  shield: { icon: '🛡', text: 'Shield armed — your streak is protected' },
+  smoke: { icon: '💨', text: 'Smoke bomb deployed on your rivals!' },
+};
 
 export default function Game({ room, playerId, round, result }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
@@ -37,6 +45,9 @@ export default function Game({ room, playerId, round, result }: Props) {
   const [used, setUsed] = useState<string[]>([]);
   const [smokeUntil, setSmokeUntil] = useState(0);
   const [smokeFrom, setSmokeFrom] = useState('');
+  // A short-lived confirmation banner shown when this player fires a power-up.
+  const [flash, setFlash] = useState<{ icon: string; text: string } | null>(null);
+  const flashTimer = useRef<number | null>(null);
   const confettiFired = useRef<string | null>(null);
   // Tracks the last whole second we played a countdown tick for, so each of the
   // final seconds beeps exactly once.
@@ -55,6 +66,7 @@ export default function Game({ room, playerId, round, result }: Props) {
     setHidden([]);
     setUsed([]);
     setSmokeUntil(0);
+    setFlash(null);
     confettiFired.current = null;
     submittedRef.current = false;
     lastTickRef.current = null;
@@ -73,6 +85,14 @@ export default function Game({ room, playerId, round, result }: Props) {
       socket.off('powerup:smoked', onSmoked);
     };
   }, []);
+
+  // Clear any pending power-up flash timer when the component unmounts.
+  useEffect(
+    () => () => {
+      if (flashTimer.current) window.clearTimeout(flashTimer.current);
+    },
+    [],
+  );
 
   // Tick the countdown until the round is revealed.
   useEffect(() => {
@@ -154,7 +174,11 @@ export default function Game({ room, playerId, round, result }: Props) {
         if (!res?.ok) return;
         setUsed((u) => (u.includes(type) ? u : [...u, type]));
         if (type === 'fifty' && res.hiddenIndices) setHidden(res.hiddenIndices);
-        play('click');
+        play('powerup');
+        const fb = POWERUP_FLASH[type];
+        setFlash(fb);
+        if (flashTimer.current) window.clearTimeout(flashTimer.current);
+        flashTimer.current = window.setTimeout(() => setFlash(null), 2600);
       },
     );
   };
@@ -200,6 +224,13 @@ export default function Game({ room, playerId, round, result }: Props) {
           <div className="smoke-banner">💨 {smokeFrom || 'A rival'} set off a smoke bomb!</div>
         )}
 
+        {flash && (
+          <div className="powerup-flash" role="status" aria-live="polite">
+            <span className="pf-icon">{flash.icon}</span>
+            <span className="pf-text">{flash.text}</span>
+          </div>
+        )}
+
         <div className={`stage ${smoked ? 'smoked' : ''}`}>
           {question.type === 'code' ? (
             <SyntaxHighlighter
@@ -226,6 +257,8 @@ export default function Game({ room, playerId, round, result }: Props) {
             >
               {question.code ?? ''}
             </SyntaxHighlighter>
+          ) : question.type === 'text' ? (
+            <TextStage prompt={question.prompt} blur={codeFilter} />
           ) : (
             <LogoStage
               slug={question.slug ?? ''}
@@ -252,7 +285,11 @@ export default function Game({ room, playerId, round, result }: Props) {
                 >
                   <span className="pu-icon">{pu.icon}</span>
                   <span className="pu-label">{pu.label}</span>
-                  <span className="pu-cost">−{pu.cost}</span>
+                  {isUsed ? (
+                    <span className="pu-active">✓ active</span>
+                  ) : (
+                    <span className="pu-cost">−{pu.cost}</span>
+                  )}
                 </button>
               );
             })}
@@ -323,6 +360,25 @@ export default function Game({ room, playerId, round, result }: Props) {
           ))}
         </ul>
       </aside>
+    </div>
+  );
+}
+
+function TextStage({ prompt, blur = 0 }: { prompt: string; blur?: number }) {
+  // "Funny" rounds show a snarky description; the player names the ritual.
+  // Progressive reveal / smoke blurs the text just like a code snippet.
+  return (
+    <div className="text-stage">
+      <span className="text-stage-quote">“</span>
+      <p
+        className="text-stage-prompt"
+        style={{
+          filter: blur ? `blur(${blur.toFixed(1)}px)` : undefined,
+          transition: 'filter 0.18s linear',
+        }}
+      >
+        {prompt}
+      </p>
     </div>
   );
 }

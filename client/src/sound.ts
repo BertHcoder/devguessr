@@ -13,7 +13,8 @@ export type SoundName =
   | 'roundStart'
   | 'tick'
   | 'win'
-  | 'lose';
+  | 'lose'
+  | 'powerup';
 
 const VOLUME_KEY = 'devguessr:sound:volume';
 const MUTED_KEY = 'devguessr:sound:muted';
@@ -145,6 +146,12 @@ const SOUNDS: Record<SoundName, Tone[]> = {
   ],
   // Short high tick for the final countdown seconds.
   tick: [{ freq: A5, start: 0, dur: 0.05, type: 'square', gain: 0.45 }],
+  // Sparkly rising flourish when a power-up is activated.
+  powerup: [
+    { freq: G5, start: 0, dur: 0.09, type: 'triangle' },
+    { freq: C6, start: 0.07, dur: 0.1, type: 'triangle' },
+    { freq: C6 * 1.5, start: 0.15, dur: 0.18, type: 'triangle', gain: 0.8 },
+  ],
   // Triumphant fanfare on the results screen for the winner.
   win: [
     { freq: C5, start: 0, dur: 0.14, type: 'triangle' },

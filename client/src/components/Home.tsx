@@ -67,14 +67,15 @@ export default function Home({
         </h1>
         <p className="hero-sub">
           A GeoGuessr for engineers. Spot the <strong>language</strong>, name the{' '}
-          <strong>framework</strong>, and unmask the <strong>company</strong> faster than your
-          friends.
+          <strong>framework</strong>, unmask the <strong>company</strong>, and call out the{' '}
+          <strong>meeting</strong> faster than your friends.
         </p>
         <div className="hero-pills">
           <span className="pill pill-language">{'</> language'}</span>
           <span className="pill pill-framework">⚙ framework</span>
           <span className="pill pill-company">★ company</span>
           <span className="pill pill-bug">🐛 spot the bug</span>
+          <span className="pill pill-funny">🎭 name the ritual</span>
         </div>
       </div>
 

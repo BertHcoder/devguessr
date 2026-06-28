@@ -1,6 +1,6 @@
-export type Category = 'language' | 'framework' | 'company' | 'bug';
+export type Category = 'language' | 'framework' | 'company' | 'bug' | 'funny';
 
-export type QuestionType = 'code' | 'logo';
+export type QuestionType = 'code' | 'logo' | 'text';
 
 /** Full question as stored on the server (includes the answer). */
 export interface Question {

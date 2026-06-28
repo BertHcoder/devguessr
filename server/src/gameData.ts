@@ -634,6 +634,130 @@ func _ready():
 main =
     text (String.fromInt (List.sum [1, 2, 3, 4]))`,
   },
+  {
+    id: 'lang-scheme',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Scheme',
+    highlight: 'scheme',
+    fact: 'A minimalist dialect of Lisp, famous from the book SICP.',
+    code: `(define (factorial n)
+  (if (= n 0)
+      1
+      (* n (factorial (- n 1)))))
+
+(display (factorial 5))`,
+  },
+  {
+    id: 'lang-prolog',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Prolog',
+    highlight: 'prolog',
+    fact: 'A logic language where you state facts and rules, not steps.',
+    code: `factorial(0, 1).
+factorial(N, F) :-
+    N > 0,
+    N1 is N - 1,
+    factorial(N1, F1),
+    F is N * F1.`,
+  },
+  {
+    id: 'lang-ada',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Ada',
+    highlight: 'ada',
+    fact: 'Named after Ada Lovelace; favored in aviation and defense systems.',
+    code: `with Ada.Text_IO; use Ada.Text_IO;
+
+procedure Hello is
+begin
+   for I in 1 .. 5 loop
+      Put_Line (Integer'Image (I));
+   end loop;
+end Hello;`,
+  },
+  {
+    id: 'lang-d',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'D',
+    highlight: 'd',
+    fact: 'A systems language reimagining C++ with safer defaults.',
+    code: `import std.stdio;
+
+void main() {
+    auto nums = [3, 1, 2];
+    foreach (n; nums) {
+        writeln(n);
+    }
+}`,
+  },
+  {
+    id: 'lang-racket',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Racket',
+    highlight: 'racket',
+    fact: 'A Scheme descendant built for creating new programming languages.',
+    code: `#lang racket
+
+(define (square x) (* x x))
+(map square '(1 2 3 4))`,
+  },
+  {
+    id: 'lang-vhdl',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'VHDL',
+    highlight: 'vhdl',
+    fact: 'A hardware description language for designing digital circuits.',
+    code: `entity AND_GATE is
+    port (A, B : in bit; Y : out bit);
+end AND_GATE;
+
+architecture rtl of AND_GATE is
+begin
+    Y <= A and B;
+end rtl;`,
+  },
+  {
+    id: 'lang-tcl',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Tcl',
+    highlight: 'tcl',
+    fact: 'A scripting language whose name stands for "Tool Command Language".',
+    code: `set total 0
+foreach n {1 2 3 4 5} {
+    incr total $n
+}
+puts $total`,
+  },
+  {
+    id: 'lang-vb',
+    category: 'language',
+    type: 'code',
+    prompt: 'Which language is this?',
+    answer: 'Visual Basic',
+    highlight: 'visual-basic',
+    fact: "Microsoft's verbose, English-like language for the .NET platform.",
+    code: `Module Program
+    Sub Main()
+        For i As Integer = 1 To 5
+            Console.WriteLine(i)
+        Next
+    End Sub
+End Module`,
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -1148,6 +1272,132 @@ app.whenReady().then(() => {
   win.loadFile('index.html');
 });`,
   },
+  {
+    id: 'fw-nuxt',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Nuxt',
+    highlight: 'html',
+    fact: 'The Vue meta-framework for server-rendered and static apps.',
+    code: `<script setup>
+const { data } = await useFetch('/api/posts')
+</script>
+
+<template>
+  <ul>
+    <li v-for="p in data" :key="p.id">{{ p.title }}</li>
+  </ul>
+</template>`,
+  },
+  {
+    id: 'fw-remix',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Remix',
+    highlight: 'jsx',
+    fact: 'A full-stack React framework built around web standards.',
+    code: `export async function loader() {
+  const posts = await db.post.findMany();
+  return json(posts);
+}
+
+export default function Posts() {
+  const posts = useLoaderData();
+  return <PostList posts={posts} />;
+}`,
+  },
+  {
+    id: 'fw-astro',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Astro',
+    highlight: 'jsx',
+    fact: 'Ships zero JavaScript by default with an islands architecture.',
+    code: `---
+const posts = await fetch('https://api.site/posts')
+  .then((r) => r.json());
+---
+<ul>
+  {posts.map((p) => <li>{p.title}</li>)}
+</ul>`,
+  },
+  {
+    id: 'fw-numpy',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'NumPy',
+    highlight: 'python',
+    fact: 'The foundational package for numerical computing in Python.',
+    code: `import numpy as np
+
+a = np.array([1, 2, 3, 4])
+b = a.reshape(2, 2)
+print(b.dot(b.T))`,
+  },
+  {
+    id: 'fw-sklearn',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'scikit-learn',
+    highlight: 'python',
+    fact: 'The go-to Python library for classical machine learning.',
+    code: `from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+preds = model.predict(X_test)`,
+  },
+  {
+    id: 'fw-streamlit',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Streamlit',
+    highlight: 'python',
+    fact: 'Turns plain Python scripts into shareable data apps.',
+    code: `import streamlit as st
+
+st.title("Dashboard")
+name = st.text_input("Your name")
+if st.button("Greet"):
+    st.write(f"Hello, {name}!")`,
+  },
+  {
+    id: 'fw-blazor',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Blazor',
+    highlight: 'csharp',
+    fact: 'Build interactive web UIs in C# instead of JavaScript.',
+    code: `<button @onclick="Increment">Count: @count</button>
+
+@code {
+    private int count = 0;
+    private void Increment() => count++;
+}`,
+  },
+  {
+    id: 'fw-axum',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Axum',
+    highlight: 'rust',
+    fact: 'An ergonomic Rust web framework from the Tokio team.',
+    code: `use axum::{routing::get, Router};
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/", get(|| async { "Hello" }));
+}`,
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -1217,6 +1467,17 @@ const companies: RawQuestion[] = [
   { id: 'co-firefox', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Firefox', slug: 'firefoxbrowser', color: '#FF7139', fact: "Mozilla's open-source web browser." },
   { id: 'co-telegram', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Telegram', slug: 'telegram', color: '#26A5E4', fact: 'A cloud-based messaging app with a popular bot API.' },
   { id: 'co-bun', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Bun', slug: 'bun', color: '#FBF0DF', fact: 'An all-in-one JavaScript runtime and toolkit, built for speed.' },
+  { id: 'co-openai', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'OpenAI', slug: 'openai', color: '#f0f6fc', fact: 'The research lab behind ChatGPT and the GPT family of models.' },
+  { id: 'co-sqlite', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'SQLite', slug: 'sqlite', color: '#003B57', fact: 'The most widely deployed database engine in the world.' },
+  { id: 'co-kafka', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Apache Kafka', slug: 'apachekafka', color: '#f0f6fc', fact: 'A distributed event-streaming platform born at LinkedIn.' },
+  { id: 'co-nodejs', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Node.js', slug: 'nodedotjs', color: '#5FA04E', fact: "JavaScript on the server, built on Chrome's V8 engine." },
+  { id: 'co-slack', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Slack', slug: 'slack', color: '#E01E5A', fact: 'The messaging hub that became a developer workplace staple.' },
+  { id: 'co-heroku', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Heroku', slug: 'heroku', color: '#79589F', fact: 'A pioneering platform-as-a-service for easy app deployment.' },
+  { id: 'co-datadog', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Datadog', slug: 'datadog', color: '#632CA6', fact: 'A cloud monitoring and observability platform.' },
+  { id: 'co-unity', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Unity', slug: 'unity', color: '#f0f6fc', fact: 'A cross-platform engine powering much of the games industry.' },
+  { id: 'co-blender', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Blender', slug: 'blender', color: '#E87D0D', fact: 'Free and open-source 3D creation software.' },
+  { id: 'co-bitbucket', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Bitbucket', slug: 'bitbucket', color: '#0052CC', fact: "Atlassian's Git hosting service for teams." },
+  { id: 'co-mariadb', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'MariaDB', slug: 'mariadb', color: '#f0f6fc', fact: 'A community-driven fork of MySQL led by its original developers.' },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -1453,6 +1714,56 @@ GROUP BY department;`,
 }
 
 console.log(greet());`,
+  },
+  {
+    id: 'bug-py-mutdefault',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 1',
+    bugLine: 1,
+    highlight: 'python',
+    fact: 'A mutable default `[]` is shared across calls — use `None` and create the list inside.',
+    code: `def add_item(item, items=[]):
+    items.append(item)
+    return items
+
+print(add_item(1))
+print(add_item(2))`,
+  },
+  {
+    id: 'bug-java-stringeq',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 5',
+    bugLine: 5,
+    highlight: 'java',
+    fact: '`==` compares object references — use `a.equals(b)` to compare string contents.',
+    code: `public class Check {
+    public static void main(String[] args) {
+        String a = "hi";
+        String b = new String("hi");
+        if (a == b) {
+            System.out.println("equal");
+        }
+    }
+}`,
+  },
+  {
+    id: 'bug-js-sort',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 2',
+    bugLine: 2,
+    highlight: 'javascript',
+    fact: 'Array.sort() sorts as strings by default — pass `(a, b) => a - b` to sort numbers.',
+    code: `function sortNums(arr) {
+  return arr.sort();
+}
+
+console.log(sortNums([10, 2, 1, 20]));`,
   },
 ];
 
