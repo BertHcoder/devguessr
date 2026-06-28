@@ -28,14 +28,20 @@ const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const POWERUPS = [
   { type: 'fifty' as const, icon: '½', label: '50/50', cost: 120, preAnswer: true, desc: 'Remove two wrong options' },
   { type: 'shield' as const, icon: '🛡', label: 'Shield', cost: 175, preAnswer: true, desc: 'Protect your streak from one miss' },
+  { type: 'double' as const, icon: '⚡', label: 'Double', cost: 250, preAnswer: true, desc: '2× points this round if correct' },
+  { type: 'freeze' as const, icon: '🧊', label: 'Freeze', cost: 150, preAnswer: true, desc: 'Add 5 seconds to the clock' },
+  { type: 'spy' as const, icon: '👁', label: 'Spy', cost: 175, preAnswer: false, desc: 'See how many players picked each option' },
   { type: 'smoke' as const, icon: '💨', label: 'Smoke', cost: 200, preAnswer: false, desc: "Blur every rival's screen" },
 ];
 
 /** Confirmation shown to the activating player the moment a power-up fires. */
-const POWERUP_FLASH: Record<'fifty' | 'shield' | 'smoke', { icon: string; text: string }> = {
+const POWERUP_FLASH: Record<'fifty' | 'shield' | 'smoke' | 'double' | 'freeze' | 'spy', { icon: string; text: string }> = {
   fifty: { icon: '½', text: '50/50 — two wrong answers removed' },
   shield: { icon: '🛡', text: 'Shield armed — your streak is protected' },
   smoke: { icon: '💨', text: 'Smoke bomb deployed on your rivals!' },
+  double: { icon: '⚡', text: 'Double Down — 2× points if you nail it!' },
+  freeze: { icon: '🧊', text: 'Time frozen — +5 seconds on the clock!' },
+  spy: { icon: '👁', text: 'Spy intel incoming…' },
 };
 
 export default function Game({ room, playerId, round, result }: Props) {
@@ -45,6 +51,7 @@ export default function Game({ room, playerId, round, result }: Props) {
   const [used, setUsed] = useState<string[]>([]);
   const [smokeUntil, setSmokeUntil] = useState(0);
   const [smokeFrom, setSmokeFrom] = useState('');
+  const [spyCounts, setSpyCounts] = useState<number[] | null>(null);
   // A short-lived confirmation banner shown when this player fires a power-up.
   const [flash, setFlash] = useState<{ icon: string; text: string } | null>(null);
   const flashTimer = useRef<number | null>(null);
@@ -66,6 +73,7 @@ export default function Game({ room, playerId, round, result }: Props) {
     setHidden([]);
     setUsed([]);
     setSmokeUntil(0);
+    setSpyCounts(null);
     setFlash(null);
     confettiFired.current = null;
     submittedRef.current = false;
@@ -80,11 +88,16 @@ export default function Game({ room, playerId, round, result }: Props) {
       setSmokeUntil(Date.now() + p.durationMs);
       play('wrong');
     };
+    const onTimeExtended = (p: { endsAt: number }) => {
+      if (round) round.endsAt = p.endsAt;
+    };
     socket.on('powerup:smoked', onSmoked);
+    socket.on('round:timeExtended', onTimeExtended);
     return () => {
       socket.off('powerup:smoked', onSmoked);
+      socket.off('round:timeExtended', onTimeExtended);
     };
-  }, []);
+  }, [round]);
 
   // Clear any pending power-up flash timer when the component unmounts.
   useEffect(
@@ -165,15 +178,16 @@ export default function Game({ room, playerId, round, result }: Props) {
     socket.emit('answer:submit', { choice: i });
   };
 
-  const buyPowerup = (type: 'fifty' | 'shield' | 'smoke') => {
+  const buyPowerup = (type: 'fifty' | 'shield' | 'smoke' | 'double' | 'freeze' | 'spy') => {
     if (used.includes(type)) return;
     socket.emit(
       'powerup:use',
       { type },
-      (res: { ok: boolean; type?: string; hiddenIndices?: number[] }) => {
+      (res: { ok: boolean; type?: string; hiddenIndices?: number[]; newEndsAt?: number; optionCounts?: number[] }) => {
         if (!res?.ok) return;
         setUsed((u) => (u.includes(type) ? u : [...u, type]));
         if (type === 'fifty' && res.hiddenIndices) setHidden(res.hiddenIndices);
+        if (type === 'spy' && res.optionCounts) setSpyCounts(res.optionCounts);
         play('powerup');
         const fb = POWERUP_FLASH[type];
         setFlash(fb);
@@ -309,6 +323,11 @@ export default function Game({ room, playerId, round, result }: Props) {
               >
                 <span className="option-key">{OPTION_KEYS[i]}</span>
                 <span className="option-label">{opt}</span>
+                {spyCounts && !result && (
+                  <span className="option-spy" title={`${spyCounts[i]} player(s) picked this`}>
+                    👁 {spyCounts[i]}
+                  </span>
+                )}
                 {state === 'correct' && <span className="option-mark">✓</span>}
                 {state === 'wrong' && <span className="option-mark">✕</span>}
               </button>

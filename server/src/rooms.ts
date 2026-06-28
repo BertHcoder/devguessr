@@ -145,6 +145,7 @@ export function addPlayer(room: Room, id: string, name: string, profile?: Partia
     color: prof.color,
     tagline: prof.tagline,
     shield: false,
+    doubleDown: false,
     usedPowerups: [],
   };
   room.players.set(id, player);
@@ -231,6 +232,7 @@ export function beginRound(room: Room): boolean {
     p.choice = null;
     p.lastPoints = 0;
     p.shield = false;
+    p.doubleDown = false;
     p.usedPowerups = [];
   }
   room.status = 'playing';
@@ -264,6 +266,7 @@ export function submitAnswer(room: Room, playerId: string, choice: number): bool
     player.streak += 1;
     const streakBonus = Math.min(250, (player.streak - 1) * 50);
     player.lastPoints = base + streakBonus;
+    if (player.doubleDown) player.lastPoints *= 2;
     player.score += player.lastPoints;
   } else {
     // A one-shot shield (a power-up) protects the streak from a single miss.
@@ -281,12 +284,15 @@ export function submitAnswer(room: Room, playerId: string, choice: number): bool
 /*  Power-ups (optional economy: spend earned points for an edge).             */
 /* -------------------------------------------------------------------------- */
 
-export type PowerupType = 'fifty' | 'shield' | 'smoke';
+export type PowerupType = 'fifty' | 'shield' | 'smoke' | 'double' | 'freeze' | 'spy';
 
 export const POWERUP_COSTS: Record<PowerupType, number> = {
   fifty: 120,
   shield: 175,
   smoke: 200,
+  double: 250,
+  freeze: 150,
+  spy: 175,
 };
 
 export interface PowerupResult {
@@ -295,6 +301,10 @@ export interface PowerupResult {
   type?: PowerupType;
   /** For `fifty`: option indices the player should remove from their board. */
   hiddenIndices?: number[];
+  /** For `freeze`: the new endsAt timestamp for the player (extended deadline). */
+  newEndsAt?: number;
+  /** For `spy`: how many players have picked each option index so far. */
+  optionCounts?: number[];
 }
 
 /**
@@ -307,9 +317,10 @@ export function usePowerup(room: Room, playerId: string, type: PowerupType): Pow
   const q = currentQuestion(room);
   if (!room.settings.powerUps) return { ok: false, error: 'Power-ups are off.' };
   if (!player || !q || room.status !== 'playing') return { ok: false, error: 'Not available right now.' };
-  if (type !== 'fifty' && type !== 'shield' && type !== 'smoke') return { ok: false, error: 'Unknown power-up.' };
+  const ALL_TYPES: PowerupType[] = ['fifty', 'shield', 'smoke', 'double', 'freeze', 'spy'];
+  if (!ALL_TYPES.includes(type)) return { ok: false, error: 'Unknown power-up.' };
   if (player.usedPowerups.includes(type)) return { ok: false, error: 'Already used this round.' };
-  if ((type === 'fifty' || type === 'shield') && player.answered) {
+  if ((type === 'fifty' || type === 'shield' || type === 'double' || type === 'freeze') && player.answered) {
     return { ok: false, error: 'You already answered.' };
   }
   const cost = POWERUP_COSTS[type];
@@ -325,6 +336,25 @@ export function usePowerup(room: Room, playerId: string, type: PowerupType): Pow
   }
   if (type === 'shield') {
     player.shield = true;
+  }
+  if (type === 'double') {
+    player.doubleDown = true;
+  }
+  if (type === 'freeze') {
+    // Extend this player's personal deadline by 5 seconds.
+    room.endsAt += 5000;
+    return { ok: true, type, newEndsAt: room.endsAt };
+  }
+  if (type === 'spy') {
+    // Count how many connected players have picked each option so far.
+    const counts = q.options.map((_, i) => {
+      let c = 0;
+      for (const p of room.players.values()) {
+        if (p.connected && p.choice === i) c++;
+      }
+      return c;
+    });
+    return { ok: true, type, optionCounts: counts };
   }
   return { ok: true, type };
 }

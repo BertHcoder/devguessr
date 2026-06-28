@@ -719,6 +719,14 @@ input { font-family: inherit; }
 .option-wrong .option-mark { color: var(--red); }
 .option-eliminated { opacity: 0.28; text-decoration: line-through; cursor: default; }
 
+.option-spy {
+  margin-left: auto;
+  font-size: 0.78rem;
+  opacity: 0.75;
+  color: var(--primary-2);
+  font-weight: 600;
+}
+
 /* --- Power-ups (optional economy) --- */
 .powerups { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .powerup {

@@ -182,7 +182,7 @@ io.on('connection', (socket) => {
     'powerup:use',
     (
       payload: { type: PowerupType },
-      ack?: (res: { ok: boolean; error?: string; type?: PowerupType; hiddenIndices?: number[] }) => void,
+      ack?: (res: { ok: boolean; error?: string; type?: PowerupType; hiddenIndices?: number[]; newEndsAt?: number; optionCounts?: number[] }) => void,
     ) => {
       const room = getRoom(socketRoom.get(socket.id) ?? '');
       if (!room) return ack?.({ ok: false, error: 'No room.' });
@@ -191,6 +191,10 @@ io.on('connection', (socket) => {
         if (res.type === 'smoke') {
           const fromName = room.players.get(socket.id)?.name ?? 'Someone';
           socket.to(room.code).emit('powerup:smoked', { fromName, durationMs: SMOKE_MS });
+        }
+        if (res.type === 'freeze') {
+          // Broadcast the extended timer to all players.
+          io.to(room.code).emit('round:timeExtended', { endsAt: room.endsAt });
         }
         broadcastRoom(room);
       }
@@ -215,6 +219,7 @@ io.on('connection', (socket) => {
       p.answered = false;
       p.choice = null;
       p.shield = false;
+      p.doubleDown = false;
       p.usedPowerups = [];
     }
     broadcastRoom(room);

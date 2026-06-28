@@ -1776,4 +1776,6 @@ export const ANSWER_POOLS: Record<Category, string[]> = {
   company: Array.from(new Set(companies.map((q) => q.answer))),
   // Bug questions derive their line-number options per game (see buildBugQuestion).
   bug: [],
+  // Funny questions are not yet implemented; placeholder for the category.
+  funny: [],
 };

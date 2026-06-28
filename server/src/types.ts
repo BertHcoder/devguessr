@@ -72,6 +72,8 @@ export interface Player {
   tagline: string;
   /** True while a one-shot streak shield (a power-up) is armed for this round. */
   shield: boolean;
+  /** True when the player activated Double Down this round (2× points if correct). */
+  doubleDown: boolean;
   /** Power-up types already used this round (prevents reuse). */
   usedPowerups: string[];
 }
