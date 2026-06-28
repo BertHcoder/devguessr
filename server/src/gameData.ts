@@ -1765,9 +1765,177 @@ print(add_item(2))`,
 
 console.log(sortNums([10, 2, 1, 20]));`,
   },
+  {
+    id: 'bug-py-scope',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 5',
+    bugLine: 5,
+    highlight: 'python',
+    fact: '`total` inside the function is a new local — use `global total` or return the value instead.',
+    code: `total = 0
+
+def add(n):
+    total += n
+
+add(5)
+print(total)`,
+  },
+  {
+    id: 'bug-ts-shallow',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 3',
+    bugLine: 3,
+    highlight: 'typescript',
+    fact: 'Spread (`...`) only copies one level deep — nested objects are still shared references.',
+    code: `const original = { a: 1, nested: { b: 2 } };
+const copy = { ...original };
+copy.nested.b = 99;
+
+console.log(original.nested.b); // expected 2, got 99`,
+  },
+  {
+    id: 'bug-rust-borrow',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 4',
+    bugLine: 4,
+    highlight: 'rust',
+    fact: 'You can\'t mutate `v` while an immutable borrow (`first`) is still alive.',
+    code: `fn main() {
+    let mut v = vec![1, 2, 3];
+    let first = &v[0];
+    v.push(4);
+    println!("{}", first);
+}`,
+  },
+  {
+    id: 'bug-js-typeof',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 2',
+    bugLine: 2,
+    highlight: 'javascript',
+    fact: '`typeof null` is `"object"` in JavaScript — check for null explicitly first.',
+    code: `function isObject(val) {
+  return typeof val === "object";
+}
+
+console.log(isObject(null)); // expected false, got true`,
+  },
+  {
+    id: 'bug-py-late-binding',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 3',
+    bugLine: 3,
+    highlight: 'python',
+    fact: 'Lambda closures capture the variable `i` by reference — all share the final value. Use a default arg: `lambda x, i=i: ...`.',
+    code: `funcs = []
+for i in range(4):
+    funcs.append(lambda x: x + i)
+
+print(funcs[0](10))  # expected 10, got 13`,
+  },
+  {
+    id: 'bug-go-nil-map',
+    category: 'bug',
+    type: 'code',
+    prompt: 'Which line has the bug?',
+    answer: 'Line 7',
+    bugLine: 7,
+    highlight: 'go',
+    fact: 'A nil map in Go panics on write. Use `make(map[string]int)` to initialize it.',
+    code: `package main
+
+import "fmt"
+
+func main() {
+	var scores map[string]int
+	scores["alice"] = 100
+	fmt.Println(scores)
+}`,
+  },
 ];
 
-export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies, ...bugs];
+/* -------------------------------------------------------------------------- */
+/*  FUNNY QUESTIONS — name the developer ritual or phenomenon described.       */
+/* -------------------------------------------------------------------------- */
+
+const funny: RawQuestion[] = [
+  {
+    id: 'fun-rubber-duck',
+    category: 'funny',
+    type: 'text',
+    prompt: 'Explaining your problem out loud to an inanimate object on your desk — then suddenly seeing the answer before you finish talking.',
+    answer: 'Rubber Duck Debugging',
+    fact: 'The term comes from "The Pragmatic Programmer" (1999). Some devs keep a literal rubber duck on their desk.',
+  },
+  {
+    id: 'fun-yak-shaving',
+    category: 'funny',
+    type: 'text',
+    prompt: 'You need to deploy a fix. First you update the CLI tool. That needs a new SDK. Which needs a new compiler. Which needs…',
+    answer: 'Yak Shaving',
+    fact: 'Coined at MIT — a chain of prerequisites that must be done before the original task, each seemingly unrelated.',
+  },
+  {
+    id: 'fun-bikeshedding',
+    category: 'funny',
+    type: 'text',
+    prompt: 'The team spends 45 minutes debating whether to use tabs or spaces, then approves a critical security patch in 30 seconds.',
+    answer: 'Bikeshedding',
+    fact: 'From Parkinson\'s Law of Triviality: a committee approves a nuclear reactor quickly but debates the bike shed color for hours.',
+  },
+  {
+    id: 'fun-heisenbug',
+    category: 'funny',
+    type: 'text',
+    prompt: 'The bug vanishes the moment you attach a debugger or add a print statement to investigate it.',
+    answer: 'Heisenbug',
+    fact: 'Named after Heisenberg\'s uncertainty principle — observing the system changes its behavior.',
+  },
+  {
+    id: 'fun-cargo-cult',
+    category: 'funny',
+    type: 'text',
+    prompt: 'Copying code from StackOverflow that works without understanding why, then being afraid to touch it forever.',
+    answer: 'Cargo Cult Programming',
+    fact: 'The term alludes to Pacific island cargo cults that mimicked military rituals hoping planes would return.',
+  },
+  {
+    id: 'fun-works-on-my-machine',
+    category: 'funny',
+    type: 'text',
+    prompt: 'CI is red, staging is broken, but you shrug because everything passes locally on your laptop.',
+    answer: 'Works On My Machine',
+    fact: 'This phenomenon inspired Docker\'s slogan: "Build once, run anywhere."',
+  },
+  {
+    id: 'fun-ten-x',
+    category: 'funny',
+    type: 'text',
+    prompt: 'Writing 500 lines in one afternoon then spending two weeks debugging a single off-by-one error in them.',
+    answer: '10x Developer',
+    fact: 'The "10x developer" myth originated from a 1968 study that found large variance in programmer productivity.',
+  },
+  {
+    id: 'fun-prod-friday',
+    category: 'funny',
+    type: 'text',
+    prompt: 'Merging a "tiny, harmless" refactor at 4:55 PM on Friday, then silently closing your laptop.',
+    answer: 'Friday Deploy',
+    fact: 'The unwritten rule: never deploy on Friday. The written rule: the on-call engineer deals with it.',
+  },
+];
+
+export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies, ...bugs, ...funny];
 
 /** Distinct answer pools per category, used to generate distractor options. */
 export const ANSWER_POOLS: Record<Category, string[]> = {
@@ -1776,6 +1944,5 @@ export const ANSWER_POOLS: Record<Category, string[]> = {
   company: Array.from(new Set(companies.map((q) => q.answer))),
   // Bug questions derive their line-number options per game (see buildBugQuestion).
   bug: [],
-  // Funny questions are not yet implemented; placeholder for the category.
-  funny: [],
+  funny: Array.from(new Set(funny.map((q) => q.answer))),
 };
