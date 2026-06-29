@@ -116,6 +116,7 @@ export default function App() {
         playerId={playerId}
         round={round}
         result={result}
+        onLeave={leaveRoom}
       />
     );
   }

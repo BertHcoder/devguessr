@@ -273,6 +273,7 @@ input { font-family: inherit; }
 }
 .btn-primary:hover:not(:disabled) { box-shadow: 0 14px 30px rgba(var(--primary-rgb), 0.55); }
 .btn-ghost { background: transparent; }
+.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 10px; }
 
 /* ----------------------------------- Home --------------------------------- */
 .home {
@@ -577,6 +578,7 @@ input { font-family: inherit; }
 }
 .game-main { display: flex; flex-direction: column; gap: 0.9rem; }
 .round-bar { display: flex; align-items: center; gap: 0.8rem; }
+.game-controls { display: flex; gap: 0.5rem; }
 .cat-badge {
   font-weight: 700;
   font-size: 0.95rem;

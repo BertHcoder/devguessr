@@ -12,6 +12,7 @@ interface Props {
   playerId: string | null;
   round: RoundStartPayload | null;
   result: RoundResultPayload | null;
+  onLeave: () => void;
 }
 
 const CATEGORY_LABEL: Record<Category, string> = {
@@ -44,7 +45,7 @@ const POWERUP_FLASH: Record<'fifty' | 'shield' | 'smoke' | 'double' | 'freeze' |
   spy: { icon: '👁', text: 'Spy intel incoming…' },
 };
 
-export default function Game({ room, playerId, round, result }: Props) {
+export default function Game({ room, playerId, round, result, onLeave }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
   const [hidden, setHidden] = useState<number[]>([]);
@@ -140,6 +141,20 @@ export default function Game({ room, playerId, round, result }: Props) {
 
   const me = useMemo(() => room.players.find((p) => p.id === playerId), [room.players, playerId]);
   const answered = me?.answered ?? selected !== null;
+  const isHost = room.hostId === playerId;
+
+  // Host: abandon the current game and send everyone back to the lobby (e.g. to
+  // fix the settings). Reuses the same server reset as "play again".
+  const backToLobby = () => {
+    if (window.confirm('End this game and send everyone back to the lobby?')) {
+      socket.emit('game:restart');
+    }
+  };
+
+  // Any player: leave the game entirely and return to the home screen.
+  const leaveGame = () => {
+    if (window.confirm('Leave the game and return home?')) onLeave();
+  };
 
   if (!round || !question) {
     return <div className="game"><div className="loading">Loading round…</div></div>;
@@ -228,6 +243,24 @@ export default function Game({ room, playerId, round, result }: Props) {
           <span className={`timer ${secondsLeft <= 5 && !result ? 'urgent' : ''}`}>
             {result ? '⏱' : `${secondsLeft}s`}
           </span>
+          <div className="game-controls">
+            {isHost && (
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={backToLobby}
+                title="End the game and send everyone back to the lobby"
+              >
+                ⏮ Lobby
+              </button>
+            )}
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={leaveGame}
+              title="Leave the game and return home"
+            >
+              Leave
+            </button>
+          </div>
         </div>
 
         <div className="progress-track">
