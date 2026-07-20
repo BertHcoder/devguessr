@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Game from './components/Game';
 import Home from './components/Home';
 import Lobby from './components/Lobby';
 import ProfileEditor from './components/ProfileEditor';
-import Results from './components/Results';
+import Results, { type GameSummary } from './components/Results';
 import SoundControl from './components/SoundControl';
 import ThemePicker from './components/ThemePicker';
 import { avatarColor, readProfile, recordGameResult, saveProfile } from './profile';
@@ -24,8 +24,14 @@ export default function App() {
   const [round, setRound] = useState<RoundStartPayload | null>(null);
   const [result, setResult] = useState<RoundResultPayload | null>(null);
   const [finalBoard, setFinalBoard] = useState<PublicPlayer[] | null>(null);
+  const [summary, setSummary] = useState<GameSummary | null>(null);
   const [profile, setProfile] = useState<PlayerProfile>(() => readProfile());
   const [editorOpen, setEditorOpen] = useState(false);
+
+  // Per-game accumulators (this player only) used to build the end-of-game summary.
+  const correctRef = useRef(0);
+  const answeredRef = useRef(0);
+  const bestStreakRef = useRef(0);
 
   useEffect(() => {
     const onConnect = () => {
@@ -39,20 +45,56 @@ export default function App() {
         setRound(null);
         setResult(null);
         setFinalBoard(null);
+        setSummary(null);
       }
     };
     const onRoundStart = (p: RoundStartPayload) => {
+      // A fresh game starts at round 0 — reset this player's running tally.
+      if (p.index === 0) {
+        correctRef.current = 0;
+        answeredRef.current = 0;
+        bestStreakRef.current = 0;
+      }
       setRound(p);
       setResult(null);
       setFinalBoard(null);
+      setSummary(null);
     };
-    const onRoundResult = (p: RoundResultPayload) => setResult(p);
+    const onRoundResult = (p: RoundResultPayload) => {
+      setResult(p);
+      const myId = socket.id;
+      const mine = myId ? p.results[myId] : undefined;
+      if (mine) {
+        answeredRef.current += 1;
+        if (mine.correct) correctRef.current += 1;
+      }
+      const me = p.leaderboard.find((pl) => pl.id === myId);
+      if (me && me.streak > bestStreakRef.current) bestStreakRef.current = me.streak;
+    };
     const onGameOver = (p: GameOverPayload) => {
       setFinalBoard(p.leaderboard);
       const myId = socket.id;
       const sorted = [...p.leaderboard].sort((a, b) => b.score - a.score);
       const idx = sorted.findIndex((pl) => pl.id === myId);
-      if (idx >= 0) recordGameResult(sorted[idx].score, idx + 1);
+      if (idx < 0) return;
+      const score = sorted[idx].score;
+      const totalPlayers = sorted.length;
+      const rec = recordGameResult({
+        score,
+        rank: idx + 1,
+        totalPlayers,
+        bestStreak: bestStreakRef.current,
+      });
+      setSummary({
+        solo: totalPlayers <= 1,
+        score,
+        correct: correctRef.current,
+        answered: answeredRef.current,
+        bestStreak: bestStreakRef.current,
+        newBestScore: rec.newBestScore,
+        newSoloBest: rec.newSoloBest,
+        prevSoloBest: rec.prevSoloBest,
+      });
     };
 
     socket.on('connect', onConnect);
@@ -78,6 +120,7 @@ export default function App() {
     setRound(null);
     setResult(null);
     setFinalBoard(null);
+    setSummary(null);
   };
 
   const commitProfile = (next: PlayerProfile) => {
@@ -104,6 +147,7 @@ export default function App() {
         room={room}
         playerId={playerId}
         leaderboard={finalBoard ?? room.players}
+        summary={summary}
         onLeave={leaveRoom}
       />
     );

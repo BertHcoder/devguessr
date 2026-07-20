@@ -3,10 +3,38 @@ import type { PlayerProfile } from './types';
 export interface PlayerStats {
   gamesPlayed: number;
   bestScore: number;
-  /** Times finished in 1st place. */
+  /** Times finished in 1st place (competitive games with 2+ players only). */
   wins: number;
-  /** Times finished in the top 3. */
+  /** Times finished in the top 3 (competitive games with 2+ players only). */
   podiums: number;
+  /** Solo runs completed. */
+  soloGames: number;
+  /** Best score achieved in a solo run. */
+  soloBestScore: number;
+  /** Longest answer streak ever reached, across all games. */
+  bestStreak: number;
+}
+
+/** Everything needed to record one finished game. */
+export interface GameResult {
+  score: number;
+  /** 1-based finishing position. */
+  rank: number;
+  /** Number of players in the game (1 = solo). */
+  totalPlayers: number;
+  /** Longest streak reached during the game. */
+  bestStreak: number;
+}
+
+/** Outcome of recording a game, so the UI can celebrate new records. */
+export interface RecordedGame {
+  stats: PlayerStats;
+  /** True when this run set a new all-time best score. */
+  newBestScore: boolean;
+  /** True when this solo run beat the previous solo best. */
+  newSoloBest: boolean;
+  /** The solo best score *before* this run (0 if none). */
+  prevSoloBest: number;
 }
 
 const PROFILE_KEY = 'devguessr:profile';
@@ -78,7 +106,15 @@ export function saveProfile(profile: PlayerProfile): PlayerProfile {
   return clean;
 }
 
-const EMPTY_STATS: PlayerStats = { gamesPlayed: 0, bestScore: 0, wins: 0, podiums: 0 };
+const EMPTY_STATS: PlayerStats = {
+  gamesPlayed: 0,
+  bestScore: 0,
+  wins: 0,
+  podiums: 0,
+  soloGames: 0,
+  soloBestScore: 0,
+  bestStreak: 0,
+};
 
 function asCount(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0;
@@ -94,6 +130,9 @@ export function readStats(): PlayerStats {
         bestScore: asCount(p.bestScore),
         wins: asCount(p.wins),
         podiums: asCount(p.podiums),
+        soloGames: asCount(p.soloGames),
+        soloBestScore: asCount(p.soloBestScore),
+        bestStreak: asCount(p.bestStreak),
       };
     }
   } catch {
@@ -102,21 +141,40 @@ export function readStats(): PlayerStats {
   return { ...EMPTY_STATS };
 }
 
-/** Record a finished game. `rank` is 1-based. Returns the updated stats. */
-export function recordGameResult(score: number, rank: number): PlayerStats {
+/**
+ * Record a finished game and return the updated stats plus any records broken.
+ *
+ * Solo runs (1 player) never count toward `wins`/`podiums` — finishing first
+ * alone is trivial — but they do track their own best score and streak so a
+ * lone player always has something to beat.
+ */
+export function recordGameResult(result: GameResult): RecordedGame {
   const stats = readStats();
+  const solo = result.totalPlayers <= 1;
+  const score = asCount(result.score);
+  const streak = asCount(result.bestStreak);
+  const prevSoloBest = stats.soloBestScore;
+
   const next: PlayerStats = {
     gamesPlayed: stats.gamesPlayed + 1,
-    bestScore: Math.max(stats.bestScore, asCount(score)),
-    wins: stats.wins + (rank === 1 ? 1 : 0),
-    podiums: stats.podiums + (rank >= 1 && rank <= 3 ? 1 : 0),
+    bestScore: Math.max(stats.bestScore, score),
+    wins: stats.wins + (!solo && result.rank === 1 ? 1 : 0),
+    podiums: stats.podiums + (!solo && result.rank >= 1 && result.rank <= 3 ? 1 : 0),
+    soloGames: stats.soloGames + (solo ? 1 : 0),
+    soloBestScore: solo ? Math.max(stats.soloBestScore, score) : stats.soloBestScore,
+    bestStreak: Math.max(stats.bestStreak, streak),
   };
   try {
     localStorage.setItem(STATS_KEY, JSON.stringify(next));
   } catch {
     /* ignore */
   }
-  return next;
+  return {
+    stats: next,
+    newBestScore: score > stats.bestScore,
+    newSoloBest: solo && score > prevSoloBest,
+    prevSoloBest,
+  };
 }
 
 const PALETTE = [

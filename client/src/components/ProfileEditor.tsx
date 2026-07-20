@@ -134,6 +134,14 @@ export default function ProfileEditor({ initial, onClose, onSave }: Props) {
             <span className="stat-label">best</span>
           </div>
           <div className="stat">
+            <span className="stat-num">🔥 {stats.bestStreak}</span>
+            <span className="stat-label">streak</span>
+          </div>
+          <div className="stat">
+            <span className="stat-num">{stats.soloBestScore}</span>
+            <span className="stat-label">solo best</span>
+          </div>
+          <div className="stat">
             <span className="stat-num">{stats.wins}</span>
             <span className="stat-label">wins</span>
           </div>

@@ -909,6 +909,51 @@ input { font-family: inherit; }
 .rest-score { color: var(--accent); font-weight: 800; }
 .results-actions { display: flex; flex-direction: column; gap: 0.7rem; width: 100%; max-width: 420px; }
 
+/* ------------------------------- Solo results ----------------------------- */
+.solo-results { gap: 1.3rem; }
+.solo-scorecard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 1.4rem 2rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  min-width: 260px;
+}
+.solo-score-num {
+  font-size: clamp(2.6rem, 9vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.solo-score-label { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: var(--muted); }
+.solo-best-line { margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted); }
+.solo-best-line.best { color: var(--green); font-weight: 700; }
+.solo-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 420px;
+}
+.solo-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.9rem 0.4rem;
+  border-radius: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.solo-stat-num { font-weight: 800; font-size: 1.3rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.solo-stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.solo-lobby-hint { margin: 0; text-align: center; color: var(--muted); font-size: 0.85rem; max-width: 420px; }
+
 .loading { color: var(--muted); text-align: center; padding: 3rem; }
 
 /* -------------------------------- Responsive ------------------------------ */
@@ -1049,7 +1094,7 @@ input { font-family: inherit; }
 
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
 }
 .stat {

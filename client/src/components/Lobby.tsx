@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { avatarColor } from '../profile';
+import { avatarColor, readStats } from '../profile';
 import { socket } from '../socket';
 import type { Category, PublicRoom } from '../types';
 import MiniGame from './MiniGame';
@@ -21,6 +21,8 @@ const CATEGORY_META: { id: Category; label: string; icon: string }[] = [
 export default function Lobby({ room, playerId, onLeave }: Props) {
   const isHost = room.hostId === playerId;
   const [copied, setCopied] = useState(false);
+  const solo = room.players.length === 1;
+  const soloBest = solo ? readStats().soloBestScore : 0;
 
   const updateSettings = (patch: Partial<PublicRoom['settings']>) => {
     if (!isHost) return;
@@ -167,10 +169,16 @@ export default function Lobby({ room, playerId, onLeave }: Props) {
       <div className="lobby-actions">
         {isHost ? (
           <button className="btn btn-primary big" onClick={() => socket.emit('game:start')}>
-            Start game ▶
+            {solo ? 'Start solo run ▶' : 'Start game ▶'}
           </button>
         ) : (
           <div className="waiting">Waiting for the host to start…</div>
+        )}
+        {isHost && solo && (
+          <p className="solo-lobby-hint">
+            🎯 {soloBest > 0 ? `Beat your solo best of ${soloBest}` : 'Set your first personal best'} —
+            or share the code above to add friends.
+          </p>
         )}
         <button className="btn btn-ghost" onClick={onLeave}>Leave room</button>
       </div>
