@@ -619,6 +619,32 @@ input { font-family: inherit; }
 }
 .stage > * { flex: 1; }
 
+.question-prompt { margin: 0; font-size: 1.05rem; line-height: 1.5; overflow-wrap: anywhere; }
+
+.cat-incident, .pill-incident { color: var(--language); border-color: var(--language); }
+.cat-ai, .pill-ai { color: var(--framework); border-color: var(--framework); }
+.stage-ai .text-stage { padding: 1.5rem; min-height: 220px; background: var(--bg-2); }
+.stage-ai .text-stage-quote { display: none; }
+.stage-ai .text-stage-prompt { max-width: 60ch; font-size: 1.15rem; line-height: 1.6; text-align: left; overflow-wrap: anywhere; }
+.incident-stage { min-width: 0; padding: 1.1rem; }
+.incident-symptom { margin: 0 0 1rem; font-size: 1.05rem; line-height: 1.5; overflow-wrap: anywhere; }
+.incident-stage h3 { margin: 0.8rem 0 0.4rem; font-size: 0.8rem; color: var(--muted); }
+.incident-logs, .incident-diff {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+.diff-added { color: var(--green); }
+.diff-removed { color: var(--red); }
+.game-main { min-width: 0; }
+.option-label { min-width: 0; overflow-wrap: anywhere; }
+.reveal-answer { flex-wrap: wrap; overflow-wrap: anywhere; }
+.reveal-fact { line-height: 1.6; overflow-wrap: anywhere; }
+
 .text-stage {
   position: relative;
   display: grid;
@@ -1111,6 +1137,9 @@ input { font-family: inherit; }
 .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 
 @media (max-width: 480px) {
+  .topbar, .topbar-right, .round-bar { flex-wrap: wrap; }
+  .topbar-right { max-width: 100%; }
+  .game-controls { margin-left: auto; }
   .emoji-grid { grid-template-columns: repeat(6, 1fr); }
   /* Keep the mute toggle but hide the slider to save topbar space. */
   .sound-slider { display: none; }

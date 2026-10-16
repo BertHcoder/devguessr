@@ -1,6 +1,11 @@
-export type Category = 'language' | 'framework' | 'company' | 'bug' | 'funny';
-export type QuestionType = 'code' | 'logo' | 'text';
+export type Category = 'language' | 'framework' | 'company' | 'bug' | 'funny' | 'incident' | 'ai';
+export type QuestionType = 'code' | 'logo' | 'text' | 'incident';
 export type RoomStatus = 'lobby' | 'playing' | 'reveal' | 'over';
+
+export interface IncidentEvidence {
+  logs: string;
+  diff: string;
+}
 
 export interface RoomSettings {
   rounds: number;
@@ -56,6 +61,7 @@ export interface PublicQuestion {
   prompt: string;
   options: string[];
   code?: string;
+  incident?: IncidentEvidence;
   highlight?: string;
   slug?: string;
   color?: string;

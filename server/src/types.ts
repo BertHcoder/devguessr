@@ -1,6 +1,11 @@
-export type Category = 'language' | 'framework' | 'company' | 'bug' | 'funny';
+export type Category = 'language' | 'framework' | 'company' | 'bug' | 'funny' | 'incident' | 'ai';
 
-export type QuestionType = 'code' | 'logo' | 'text';
+export type QuestionType = 'code' | 'logo' | 'text' | 'incident';
+
+export interface IncidentEvidence {
+  logs: string;
+  diff: string;
+}
 
 /** Full question as stored on the server (includes the answer). */
 export interface Question {
@@ -15,6 +20,7 @@ export interface Question {
   options: string[];
   /** For `code` questions: the snippet to display. */
   code?: string;
+  incident?: IncidentEvidence;
   /** For `bug` questions: the 1-based line number that contains the bug (never sent to clients). */
   bugLine?: number;
   /** Prism language id used for syntax highlighting (does not reveal the answer for similar languages). */
@@ -35,6 +41,7 @@ export interface PublicQuestion {
   prompt: string;
   options: string[];
   code?: string;
+  incident?: IncidentEvidence;
   highlight?: string;
   slug?: string;
   color?: string;

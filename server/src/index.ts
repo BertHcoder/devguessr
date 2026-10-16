@@ -96,7 +96,7 @@ function endRound(room: Room): void {
       io.to(room.code).emit('game:over', { leaderboard: leaderboard(room) });
       broadcastRoom(room);
     }
-  }, REVEAL_MS);
+  }, q.category === 'incident' ? 15000 : q.category === 'ai' ? 10000 : REVEAL_MS);
 }
 
 function launchGame(room: Room): void {

@@ -2,7 +2,13 @@ import type { Category, Question } from './types.js';
 
 /** A question authored without its multiple-choice options. Options are
  *  generated per-game from the category answer pool so each match feels fresh. */
-export type RawQuestion = Omit<Question, 'options'>;
+export type RawQuestion = Omit<Question, 'options'> & {
+  distractors?: string[];
+  sources?: string[];
+  reviewedOn?: string;
+};
+
+export const CONTENT_REVIEWED_ON = '2026-10-16';
 
 /* -------------------------------------------------------------------------- */
 /*  LANGUAGE QUESTIONS — guess the programming language from a code snippet.   */
@@ -81,6 +87,7 @@ console.log(greet({ id: 1, name: "Ada" }));`,
     type: 'code',
     prompt: 'Which language is this?',
     answer: 'JavaScript',
+    distractors: ['Python', 'Ruby', 'Go'],
     highlight: 'javascript',
     fact: 'Created in just 10 days in 1995.',
     code: `const nums = [1, 2, 3, 4];
@@ -213,7 +220,7 @@ ORDER BY people DESC;`,
     prompt: 'Which language is this?',
     answer: 'Bash',
     highlight: 'bash',
-    fact: 'The default shell on most Linux systems.',
+    fact: 'The GNU Bourne Again Shell; commonly used as an interactive shell on Linux.',
     code: `#!/usr/bin/env bash
 for file in *.log; do
   echo "Processing $file"
@@ -300,7 +307,7 @@ end`,
     fact: 'Once called the "duct tape" of the internet.',
     code: `my @words = qw(beta alpha gamma);
 my @sorted = sort @words;
-print "$_\n" for @sorted;`,
+print "$_\\n" for @sorted;`,
   },
   {
     id: 'lang-r',
@@ -358,7 +365,7 @@ printfn "%d" (factorial 5)`,
   | [] -> 0
   | x :: xs -> x + sum xs
 
-let () = Printf.printf "%d\n" (sum [1; 2; 3; 4])`,
+let () = Printf.printf "%d\\n" (sum [1; 2; 3; 4])`,
   },
   {
     id: 'lang-zig',
@@ -375,7 +382,7 @@ pub fn main() void {
     for (0..10) |i| {
         sum += @intCast(i);
     }
-    std.debug.print("{}\n", .{sum});
+    std.debug.print("{}\\n", .{sum});
 }`,
   },
   {
@@ -385,7 +392,7 @@ pub fn main() void {
     prompt: 'Which language is this?',
     answer: 'Erlang',
     highlight: 'erlang',
-    fact: 'Built by Ericsson for telecom systems with nine-nines uptime.',
+    fact: 'Created at Ericsson for concurrent, fault-tolerant telecommunications software.',
     code: `-module(fact).
 -export([calc/1]).
 
@@ -441,7 +448,7 @@ end program squares`,
     category: 'language',
     type: 'code',
     prompt: 'Which language is this?',
-    answer: 'Lisp',
+    answer: 'Common Lisp',
     highlight: 'lisp',
     fact: 'One of the oldest languages; famous for its parentheses.',
     code: `(defun factorial (n)
@@ -472,6 +479,7 @@ _start:
     type: 'code',
     prompt: 'Which language is this?',
     answer: 'C',
+    distractors: ['Rust', 'Go', 'Java'],
     highlight: 'c',
     fact: 'Created by Dennis Ritchie at Bell Labs in the early 1970s.',
     code: `#include <stdio.h>
@@ -628,7 +636,7 @@ func _ready():
     prompt: 'Which language is this?',
     answer: 'Elm',
     highlight: 'elm',
-    fact: 'A purely functional language for the front end, famous for no runtime errors.',
+    fact: 'A functional language for web interfaces whose type system rules out many common runtime errors in Elm code.',
     code: `import Html exposing (text)
 
 main =
@@ -822,12 +830,12 @@ export class HelloComponent {
     prompt: 'Which framework / library is this?',
     answer: 'Svelte',
     highlight: 'html',
-    fact: 'Compiles components away — no runtime virtual DOM.',
+    fact: 'Svelte 5 uses runes such as $state for reactivity and compiles components without a virtual DOM.',
     code: `<script>
-  let count = 0;
+  let count = $state(0);
 </script>
 
-<button on:click={() => count += 1}>
+<button onclick={() => count += 1}>
   Clicked {count} times
 </button>`,
   },
@@ -897,7 +905,7 @@ app.listen(3000);`,
     prompt: 'Which framework / library is this?',
     answer: 'Spring',
     highlight: 'java',
-    fact: 'The dominant enterprise framework in the Java world.',
+    fact: 'A Java application framework with dependency injection and web support through Spring MVC and WebFlux.',
     code: `@RestController
 public class HelloController {
     @GetMapping("/hello")
@@ -913,7 +921,7 @@ public class HelloController {
     prompt: 'Which framework / library is this?',
     answer: 'Laravel',
     highlight: 'php',
-    fact: 'The most popular PHP framework, known for elegant syntax.',
+    fact: 'A PHP web framework with the Eloquent ORM, routing, queues, and an expressive API.',
     code: `<?php
 Route::get('/users', function () {
     return User::where('active', 1)
@@ -929,9 +937,12 @@ Route::get('/users', function () {
     answer: 'Next.js',
     highlight: 'jsx',
     fact: 'The React meta-framework built by Vercel.',
-    code: `export default async function Page() {
+    code: `import { notFound } from 'next/navigation';
+
+export default async function Page() {
   const data = await fetch('https://api.site/posts')
     .then((r) => r.json());
+  if (!data.length) notFound();
   return <ul>{data.map((p) => <li key={p.id}>{p.title}</li>)}</ul>;
 }`,
   },
@@ -973,7 +984,7 @@ Route::get('/users', function () {
     prompt: 'Which framework / library is this?',
     answer: 'jQuery',
     highlight: 'javascript',
-    fact: 'Once on nearly every website: "write less, do more".',
+    fact: 'A JavaScript library for DOM traversal, events, and effects, with the motto "write less, do more".',
     code: `$(document).ready(function () {
   $('#btn').click(function () {
     $('.box').fadeOut(300);
@@ -1235,7 +1246,7 @@ fun Greeting(name: String) {
     prompt: 'Which framework / library is this?',
     answer: 'Three.js',
     highlight: 'javascript',
-    fact: 'The most popular library for 3D graphics in the browser via WebGL.',
+    fact: 'A JavaScript 3D graphics library with WebGL and WebGPU renderers.',
     code: `const scene = new THREE.Scene();
 const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -1297,8 +1308,11 @@ const { data } = await useFetch('/api/posts')
     prompt: 'Which framework / library is this?',
     answer: 'Remix',
     highlight: 'jsx',
-    fact: 'A full-stack React framework built around web standards.',
-    code: `export async function loader() {
+    fact: 'This is the Remix v2 API. Its framework features became the basis of React Router v7; the versioned imports distinguish this example.',
+    code: `import { json } from '@remix-run/node';
+  import { useLoaderData } from '@remix-run/react';
+
+  export async function loader() {
   const posts = await db.post.findMany();
   return json(posts);
 }
@@ -1398,6 +1412,43 @@ async fn main() {
         .route("/", get(|| async { "Hello" }));
 }`,
   },
+  {
+    id: 'fw-hono',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which framework / library is this?',
+    answer: 'Hono',
+    highlight: 'typescript',
+    code: `import { Hono } from 'hono';
+
+const app = new Hono();
+app.get('/health', (context) => context.json({ ok: true }));
+
+export default app;`,
+    fact: 'Hono is a web framework built on Web Standards, with adapters and integrations for multiple JavaScript runtimes.',
+    sources: ['https://hono.dev/docs/'],
+  },
+  {
+    id: 'fw-langgraph',
+    category: 'framework',
+    type: 'code',
+    prompt: 'Which agent orchestration framework is this?',
+    answer: 'LangGraph',
+    highlight: 'python',
+    distractors: ['PyTorch', 'FastAPI', 'Django'],
+    code: `from langgraph.graph import StateGraph, MessagesState, START, END
+
+def reply(state: MessagesState):
+    return {"messages": [{"role": "ai", "content": "Ready"}]}
+
+builder = StateGraph(MessagesState)
+builder.add_node("reply", reply)
+builder.add_edge(START, "reply")
+builder.add_edge("reply", END)
+agent = builder.compile()`,
+    fact: 'LangGraph provides stateful graph orchestration for workflows and agents, including persistence and human-in-the-loop support. It can be used without LangChain.',
+    sources: ['https://docs.langchain.com/oss/python/langgraph/overview'],
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -1413,10 +1464,10 @@ const companies: RawQuestion[] = [
   { id: 'co-jenkins', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Jenkins', slug: 'jenkins', color: '#D24939', fact: 'The veteran open-source automation server for CI/CD.' },
   { id: 'co-firebase', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Firebase', slug: 'firebase', color: '#FFCA28', fact: "Google's app platform with a realtime NoSQL database." },
   { id: 'co-google', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Google', slug: 'google', color: '#4285F4', fact: 'Created Go, Angular, Kubernetes, and TensorFlow.' },
-  { id: 'co-stackoverflow', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Stack Overflow', slug: 'stackoverflow', color: '#F58025', fact: 'The Q&A site every developer has copy-pasted from.' },
+  { id: 'co-stackoverflow', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Stack Overflow', slug: 'stackoverflow', color: '#F58025', fact: 'A programming Q&A community built around questions, answers, voting, and reputation.' },
   { id: 'co-mongodb', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'MongoDB', slug: 'mongodb', color: '#47A248', fact: 'A document database; the name comes from "humongous".' },
   { id: 'co-redis', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Redis', slug: 'redis', color: '#FF4438', fact: 'An in-memory data store often used for caching.' },
-  { id: 'co-figma', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Figma', slug: 'figma', color: '#F24E1E', fact: 'A browser-based design tool acquired by Adobe.' },
+  { id: 'co-figma', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Figma', slug: 'figma', color: '#F24E1E', fact: 'A browser-based design tool. Adobe and Figma terminated their proposed acquisition in December 2023.' },
   { id: 'co-vercel', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Vercel', slug: 'vercel', color: '#f0f6fc', fact: 'The company behind Next.js.' },
   { id: 'co-linux', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Linux', slug: 'linux', color: '#FCC624', fact: 'Tux the penguin is its mascot.' },
   { id: 'co-gitlab', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'GitLab', slug: 'gitlab', color: '#FC6D26', fact: 'A fully remote company with a famously public handbook.' },
@@ -1440,10 +1491,10 @@ const companies: RawQuestion[] = [
   { id: 'co-googlegemini', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Google Gemini', slug: 'googlegemini', color: '#886FBF', fact: "Google's flagship family of multimodal AI models." },
   { id: 'co-ollama', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ollama', slug: 'ollama', color: '#f0f6fc', fact: 'Run large language models locally with a single command.' },
   { id: 'co-perplexity', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Perplexity', slug: 'perplexity', color: '#1FB8CD', fact: 'An AI-powered answer engine that cites its sources.' },
-  { id: 'co-nvidia', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Nvidia', slug: 'nvidia', color: '#76B900', fact: 'Its GPUs power most of the world\'s AI training.' },
-  { id: 'co-meta', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Meta', slug: 'meta', color: '#0467DF', fact: 'Built React and PyTorch, and the open Llama models.' },
+  { id: 'co-nvidia', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Nvidia', slug: 'nvidia', color: '#76B900', fact: 'Develops GPUs and the CUDA platform used for accelerated computing and AI workloads.' },
+  { id: 'co-meta', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Meta', slug: 'meta', color: '#0467DF', fact: 'Created React, PyTorch, and the Llama model family. Llama releases have version-specific licenses; open weights do not automatically mean open source.' },
   { id: 'co-apple', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Apple', slug: 'apple', color: '#f0f6fc', fact: 'Creator of Swift, the language for iOS and macOS apps.' },
-  { id: 'co-mysql', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'MySQL', slug: 'mysql', color: '#4479A1', fact: "The world's most popular open-source relational database." },
+  { id: 'co-mysql', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'MySQL', slug: 'mysql', color: '#4479A1', fact: 'A relational database maintained by Oracle, with a GPL-licensed Community Edition.' },
   { id: 'co-discord', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Discord', slug: 'discord', color: '#5865F2', fact: 'A chat platform that became home to countless dev communities.' },
   { id: 'co-reddit', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Reddit', slug: 'reddit', color: '#FF4500', fact: 'Its codebase was open-sourced for many years.' },
   { id: 'co-stripe', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Stripe', slug: 'stripe', color: '#635BFF', fact: 'Developer-first payments infrastructure for the internet.' },
@@ -1456,23 +1507,20 @@ const companies: RawQuestion[] = [
   { id: 'co-eslint', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'ESLint', slug: 'eslint', color: '#4B32C3', fact: 'The pluggable linter that keeps JavaScript and TypeScript tidy.' },
   { id: 'co-prettier', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Prettier', slug: 'prettier', color: '#F7B93E', fact: 'An opinionated code formatter that ends arguments about style.' },
   { id: 'co-storybook', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Storybook', slug: 'storybook', color: '#FF4785', fact: 'A workshop for building and documenting UI components in isolation.' },
-  { id: 'co-jest', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Jest', slug: 'jest', color: '#C21325', fact: "Meta's 'delightful' JavaScript testing framework." },
+  { id: 'co-jest', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Jest', slug: 'jest', color: '#C21325', fact: 'A JavaScript testing framework originally created at Facebook and transferred to the OpenJS Foundation in 2022.' },
   { id: 'co-cypress', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Cypress', slug: 'cypress', color: '#69D3A7', fact: 'An end-to-end testing tool that runs right inside the browser.' },
   { id: 'co-prisma', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Prisma', slug: 'prisma', color: '#f0f6fc', fact: 'A next-generation, type-safe ORM for Node.js and TypeScript.' },
   { id: 'co-ansible', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ansible', slug: 'ansible', color: '#EE0000', fact: "Red Hat's agentless tool for automating configuration and deployment." },
   { id: 'co-digitalocean', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'DigitalOcean', slug: 'digitalocean', color: '#0080FF', fact: 'Developer-friendly cloud hosting; its mascot is a shark named Sammy.' },
   { id: 'co-netlify', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Netlify', slug: 'netlify', color: '#00C7B7', fact: 'A platform for deploying static sites and serverless functions.' },
   { id: 'co-githubactions', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'GitHub Actions', slug: 'githubactions', color: '#2088FF', fact: "GitHub's built-in CI/CD automation platform." },
-  { id: 'co-ubuntu', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ubuntu', slug: 'ubuntu', color: '#E95420', fact: 'The most popular desktop Linux distribution, built by Canonical.' },
+  { id: 'co-ubuntu', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Ubuntu', slug: 'ubuntu', color: '#E95420', fact: 'A Debian-based Linux distribution published by Canonical.' },
   { id: 'co-firefox', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Firefox', slug: 'firefoxbrowser', color: '#FF7139', fact: "Mozilla's open-source web browser." },
   { id: 'co-telegram', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Telegram', slug: 'telegram', color: '#26A5E4', fact: 'A cloud-based messaging app with a popular bot API.' },
   { id: 'co-bun', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Bun', slug: 'bun', color: '#FBF0DF', fact: 'An all-in-one JavaScript runtime and toolkit, built for speed.' },
-  { id: 'co-openai', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'OpenAI', slug: 'openai', color: '#f0f6fc', fact: 'The research lab behind ChatGPT and the GPT family of models.' },
   { id: 'co-sqlite', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'SQLite', slug: 'sqlite', color: '#003B57', fact: 'The most widely deployed database engine in the world.' },
   { id: 'co-kafka', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Apache Kafka', slug: 'apachekafka', color: '#f0f6fc', fact: 'A distributed event-streaming platform born at LinkedIn.' },
   { id: 'co-nodejs', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Node.js', slug: 'nodedotjs', color: '#5FA04E', fact: "JavaScript on the server, built on Chrome's V8 engine." },
-  { id: 'co-slack', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Slack', slug: 'slack', color: '#E01E5A', fact: 'The messaging hub that became a developer workplace staple.' },
-  { id: 'co-heroku', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Heroku', slug: 'heroku', color: '#79589F', fact: 'A pioneering platform-as-a-service for easy app deployment.' },
   { id: 'co-datadog', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Datadog', slug: 'datadog', color: '#632CA6', fact: 'A cloud monitoring and observability platform.' },
   { id: 'co-unity', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Unity', slug: 'unity', color: '#f0f6fc', fact: 'A cross-platform engine powering much of the games industry.' },
   { id: 'co-blender', category: 'company', type: 'logo', prompt: 'Which company / brand is this?', answer: 'Blender', slug: 'blender', color: '#E87D0D', fact: 'Free and open-source 3D creation software.' },
@@ -1527,7 +1575,7 @@ const bugs: RawQuestion[] = [
     answer: 'Line 2',
     bugLine: 2,
     highlight: 'typescript',
-    fact: 'A single `=` is assignment; the comparison needs `n % 2 === 0`.',
+    fact: 'Assignment cannot target the expression n % 2. Use n % 2 === 0 to compare the remainder with zero.',
     code: `function isEven(n: number): boolean {
   if (n % 2 = 0) {
     return true;
@@ -1585,7 +1633,7 @@ func main() {
 
 class Program {
     static void Main() {
-        int[] nums = { 4, 8, 15, 16 };
+        int[] nums = { 4, 16, 8, 15 };
         int max = 0;
         foreach (int n in nums) {
             if (n > max);
@@ -1671,11 +1719,11 @@ int main(void) {
     id: 'bug-rust-init',
     category: 'bug',
     type: 'code',
-    prompt: 'Which line has the bug?',
+    prompt: 'For a nonempty slice that may contain only negative numbers, which line breaks the maximum calculation?',
     answer: 'Line 2',
     bugLine: 2,
     highlight: 'rust',
-    fact: 'Seeding `largest` with 0 breaks for all-negative inputs — start from `nums[0]` or `i32::MIN`.',
+    fact: 'Seeding largest with 0 fails for all-negative input. Under the nonempty-slice contract, start from nums[0] or i32::MIN. A general API should handle empty input explicitly.',
     code: `fn max(nums: &[i32]) -> i32 {
     let mut largest = 0;
     for &n in nums {
@@ -1694,7 +1742,7 @@ int main(void) {
     answer: 'Line 3',
     bugLine: 3,
     highlight: 'sql',
-    fact: "You can't filter an aggregate in `WHERE` — use `HAVING AVG(salary) > 50000` after `GROUP BY`.",
+    fact: 'WHERE filters input rows, not grouped results. Use HAVING AVG(salary) > 50000 after GROUP BY; relying on the SELECT alias in WHERE is also not portable SQL.',
     code: `SELECT department, AVG(salary) AS avg_pay
 FROM employees
 WHERE avg_pay > 50000
@@ -1770,8 +1818,8 @@ console.log(sortNums([10, 2, 1, 20]));`,
     category: 'bug',
     type: 'code',
     prompt: 'Which line has the bug?',
-    answer: 'Line 5',
-    bugLine: 5,
+    answer: 'Line 4',
+    bugLine: 4,
     highlight: 'python',
     fact: '`total` inside the function is a new local — use `global total` or return the value instead.',
     code: `total = 0
@@ -1786,9 +1834,9 @@ print(total)`,
     id: 'bug-ts-shallow',
     category: 'bug',
     type: 'code',
-    prompt: 'Which line has the bug?',
-    answer: 'Line 3',
-    bugLine: 3,
+    prompt: 'The copy must have independent nested data. Which line fails to create that independent copy?',
+    answer: 'Line 2',
+    bugLine: 2,
     highlight: 'typescript',
     fact: 'Spread (`...`) only copies one level deep — nested objects are still shared references.',
     code: `const original = { a: 1, nested: { b: 2 } };
@@ -1817,7 +1865,7 @@ console.log(original.nested.b); // expected 2, got 99`,
     id: 'bug-js-typeof',
     category: 'bug',
     type: 'code',
-    prompt: 'Which line has the bug?',
+    prompt: 'This predicate must reject null. Which line incorrectly accepts it?',
     answer: 'Line 2',
     bugLine: 2,
     highlight: 'javascript',
@@ -1955,7 +2003,7 @@ const funny: RawQuestion[] = [
     type: 'text',
     prompt: 'CI is red and production is down, but you shrug because it all runs perfectly on your own laptop.',
     answer: 'Works On My Machine',
-    fact: 'This exact frustration helped inspire Docker and the rise of containers.',
+    fact: 'Containers package an application with its user-space dependencies, reducing environment differences without making every host identical.',
   },
   {
     id: 'fun-merge-conflict',
@@ -1971,7 +2019,7 @@ const funny: RawQuestion[] = [
     type: 'text',
     prompt: 'Spending days speeding up a function that runs once a year, while the genuinely slow part sits untouched.',
     answer: 'Premature Optimization',
-    fact: 'Donald Knuth: "Premature optimization is the root of all evil."',
+    fact: 'Knuth\'s warning concerns optimizing too early; the surrounding passage also stresses not missing opportunities in the critical 3% of code.',
   },
   {
     id: 'fun-scope-creep',
@@ -1987,7 +2035,7 @@ const funny: RawQuestion[] = [
     type: 'text',
     prompt: 'A loop whose exit condition is never met, so it runs forever and freezes the whole program.',
     answer: 'Infinite Loop',
-    fact: 'To understand recursion, you must first understand recursion.',
+    fact: 'An accidental infinite loop has no reachable stopping condition; intentional event loops need their own shutdown mechanism.',
   },
   {
     id: 'fun-memory-leak',
@@ -2009,7 +2057,7 @@ const funny: RawQuestion[] = [
     id: 'fun-null-pointer',
     category: 'funny',
     type: 'text',
-    prompt: 'Trying to use something that points to nothing — the error that has crashed more programs than any other.',
+    prompt: 'Dereferencing a reference that has no object behind it, often causing an exception or crash.',
     answer: 'Null Pointer',
     fact: 'Tony Hoare called inventing the null reference his "billion-dollar mistake".',
   },
@@ -2031,7 +2079,300 @@ const funny: RawQuestion[] = [
   },
 ];
 
-export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies, ...bugs, ...funny];
+const incidents: RawQuestion[] = [
+  {
+    id: 'incident-cache-tenant',
+    category: 'incident',
+    type: 'incident',
+    prompt: 'After a deploy, an authenticated customer sometimes sees another company\'s dashboard. What caused it?',
+    answer: 'The cache key no longer includes the tenant',
+    distractors: ['The session cookie expired', 'The database replica is lagging', 'The CDN cached the HTML shell'],
+    incident: {
+      logs: 'auth user=42 tenant=alpha OK\napp-cache SET key=dashboard tenant=alpha\nauth user=87 tenant=beta OK\napp-cache HIT key=dashboard payloadTenant=alpha\nresponse Cache-Control=no-store; CDN=BYPASS',
+      diff: '- const key = `dashboard:${tenantId}`;\n+ const key = "dashboard";\n  return cache.getOrSet(key, () => loadDashboard(tenantId));',
+    },
+    fact: 'The shared cache key reuses alpha\'s dashboard for beta. Restore tenant scoping and invalidate the affected entry. Why not CDN caching? The response bypasses the CDN; the log identifies an application-cache hit with the wrong tenant.',
+  },
+  {
+    id: 'incident-timeout-units',
+    category: 'incident',
+    type: 'incident',
+    prompt: 'Immediately after a deploy, every checkout fails within a few milliseconds. What caused it?',
+    answer: 'Seconds were passed to a millisecond timeout',
+    distractors: ['The payment provider is down', 'The payment API key expired', 'The retry limit is too low'],
+    incident: {
+      logs: 'config PAYMENT_TIMEOUT_SECONDS=3\nPOST /checkout payment elapsed=3ms error=TimeoutError\nPOST /checkout payment elapsed=4ms error=TimeoutError\nprovider probe: HTTP 200 elapsed=180ms',
+      diff: '- const timeoutMs = Number(env.PAYMENT_TIMEOUT_SECONDS) * 1000;\n+ const timeoutMs = Number(env.PAYMENT_TIMEOUT_SECONDS);\n  fetch(paymentUrl, { signal: AbortSignal.timeout(timeoutMs) });',
+    },
+    fact: 'AbortSignal.timeout expects milliseconds, so 3 seconds became 3 milliseconds. Restore the conversion. Why not a provider outage? The independent probe succeeds in 180ms, while checkout aborts locally after about 3ms.',
+  },
+  {
+    id: 'incident-pool-leak',
+    category: 'incident',
+    type: 'incident',
+    prompt: 'Orders work after each restart, then hang once ten requests have completed. What caused it?',
+    answer: 'Database connections are never returned to the pool',
+    distractors: ['A missing index makes the query slow', 'The database connection limit was reduced', 'The database is deadlocked'],
+    incident: {
+      logs: 'pool max=10 active=10 idle=0 waiting=23\ncompleted requests since restart=10\nquery duration p95=4ms; database lock waits=0\nnext request: connection acquisition timed out',
+      diff: '  const client = await pool.connect();\n- try { return await client.query(sql); }\n- finally { client.release(); }\n+ return await client.query(sql);',
+    },
+    fact: 'Each request checks out a connection without releasing it. After ten requests the pool is exhausted. Restore release() in a finally block. Why not a missing index? Queries finish in 4ms; requests are waiting to acquire a connection, not waiting for query execution.',
+  },
+  {
+    id: 'incident-cookie-secure',
+    category: 'incident',
+    type: 'incident',
+    prompt: 'Login returns 200, but the next request is unauthorized. The customer portal is served over HTTPS. What caused it?',
+    answer: 'The cross-site session cookie is missing Secure',
+    distractors: ['The CORS origin is not allowed', 'The session expires immediately', 'The login request forgot credentials'],
+    incident: {
+      logs: 'page=https://portal.customer.test; API=https://api.vendor.test\nlogin fetch: credentials=include; status=200\nCORS: origin=https://portal.customer.test; allow-credentials=true\nbrowser: SameSite=None cookie blocked because Secure is missing\nGET /me Cookie=<absent> status=401',
+      diff: '- sessionCookie = "sid=abc; HttpOnly; SameSite=None; Secure; Path=/";\n+ sessionCookie = "sid=abc; HttpOnly; SameSite=None; Path=/";',
+    },
+    fact: 'Browsers require Secure on SameSite=None cookies. Restore Secure and keep HTTPS. Why not CORS? The allowed origin and credentials headers are correct; the browser explicitly reports rejecting the cookie before it can be sent with /me.',
+  },
+  {
+    id: 'incident-async-response',
+    category: 'incident',
+    type: 'incident',
+    prompt: 'The receipt endpoint returns 200 even when sending the email later fails. What caused it?',
+    answer: 'The send promise is no longer awaited',
+    distractors: ['The email provider is rate-limiting requests', 'The reverse proxy times out', 'The JSON body parser is disabled'],
+    incident: {
+      logs: 'request=r17 parsed orderId=812\nrequest=r17 HTTP 200 elapsed=2ms\nrequest=r17 sendReceipt rejected after=240ms: SMTP 550 mailbox unavailable\nprocess: unhandled promise rejection',
+      diff: '  try {\n-   await sendReceipt(orderId);\n+   sendReceipt(orderId);\n    res.sendStatus(200);\n  } catch { res.sendStatus(502); }',
+    },
+    fact: 'Without await, the handler responds before sendReceipt settles, and the later rejection escapes the try/catch. Restore await. Why not provider rate limiting? The logged failure is a mailbox error, and any asynchronous send failure would still be hidden behind a premature 200.',
+  },
+  {
+    id: 'incident-retry-duplicate',
+    category: 'incident',
+    type: 'incident',
+    prompt: 'One checkout creates two charges after a network timeout. The provider deduplicates requests only by Idempotency-Key. What caused it?',
+    answer: 'Each retry generates a new idempotency key',
+    distractors: ['The customer double-clicked Pay', 'The webhook was delivered twice', 'The retry delay is too short'],
+    incident: {
+      logs: 'checkout=c42 browser submissions=1\nattempt=1 key=k1 provider charge=ch1; response lost\nattempt=2 key=k2 provider charge=ch2; HTTP 200\nwebhook deliveries: ch1=1 ch2=1',
+      diff: '- const key = checkout.id;\n  for (let attempt = 0; attempt < 2; attempt++) {\n+   const key = crypto.randomUUID();\n    await charge(checkout, { idempotencyKey: key });\n  }',
+    },
+    fact: 'The provider sees different keys and treats the retry as a new payment. Reuse one stable key per checkout across attempts. Why not a double-click? There is one browser submission; two server attempts use different keys after the first response is lost.',
+  },
+];
+
+const ai: RawQuestion[] = [
+  {
+    id: 'ai-mcp', category: 'ai', type: 'text',
+    prompt: 'Your assistant needs one standard way to discover tools and read resources from different external systems. Which protocol is designed for that connection?',
+    answer: 'Model Context Protocol (MCP)',
+    distractors: ['Agent2Agent (A2A)', 'Language Server Protocol (LSP)', 'WebRTC'],
+    fact: 'MCP connects AI applications to external tools, data, and resources. It is not a model and does not grant blanket permission to execute everything a server exposes.',
+    sources: ['https://modelcontextprotocol.io/docs/getting-started/intro'],
+  },
+  {
+    id: 'ai-a2a', category: 'ai', type: 'text',
+    prompt: 'A purchasing agent must delegate a task to a vendor\'s independently built agent and follow its progress. Which protocol was introduced for agent-to-agent interoperability?',
+    answer: 'Agent2Agent (A2A)',
+    distractors: ['Model Context Protocol (MCP)', 'OpenAPI', 'Language Server Protocol (LSP)'],
+    fact: 'Google announced A2A in April 2025 for communication and task coordination between agents. MCP instead focuses on connecting AI applications to tools and context.',
+    sources: ['https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/'],
+  },
+  {
+    id: 'ai-skills', category: 'ai', type: 'text',
+    prompt: 'You package a SKILL.md file with instructions, reference files, and optional scripts that an agent loads when relevant. What are you creating?',
+    answer: 'An Agent Skill',
+    distractors: ['A fine-tuned model checkpoint', 'A vector embedding', 'A model tokenizer'],
+    fact: 'Agent Skills package procedural knowledge and resources. Loading a skill supplies context; it does not retrain the model\'s weights.',
+    sources: ['https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills'],
+  },
+  {
+    id: 'ai-agent-loop', category: 'ai', type: 'text',
+    prompt: 'A coding assistant chooses a tool, inspects its result, changes its plan, and repeats until tests pass or a stopping limit is reached. Which architecture best describes this?',
+    answer: 'A tool-using agent loop',
+    distractors: ['A single text completion', 'A fixed ETL pipeline', 'A model training loop'],
+    fact: 'An agent dynamically selects steps using environmental feedback. Limits on iterations, spending, and permissions are application controls, not properties guaranteed by the model.',
+    sources: ['https://www.anthropic.com/engineering/building-effective-agents'],
+  },
+  {
+    id: 'ai-workflow', category: 'ai', type: 'text',
+    prompt: 'An application always runs the same sequence: classify a ticket, draft a reply, then request approval. The model cannot choose a different path. What is this?',
+    answer: 'A predefined LLM workflow',
+    distractors: ['An autonomous planning agent', 'A mixture-of-experts layer', 'Reinforcement learning'],
+    fact: 'In Anthropic\'s architectural distinction, workflows follow predefined code paths while agents dynamically direct their process and tool usage.',
+    sources: ['https://www.anthropic.com/engineering/building-effective-agents'],
+  },
+  {
+    id: 'ai-tool-execution', category: 'ai', type: 'text',
+    prompt: 'A model returns a custom function call named refund_order with JSON arguments. In an application-managed tool loop, what must happen before a real refund occurs?',
+    answer: 'Application code validates and executes the action',
+    distractors: ['The JSON itself transfers the funds', 'The model edits its trained weights', 'The tokenizer contacts the payment provider'],
+    fact: 'A custom function call is a request for your application to act. Your code must enforce authorization, validate inputs, execute the tool, and return its result.',
+    sources: ['https://developers.openai.com/api/docs/guides/function-calling'],
+  },
+  {
+    id: 'ai-untrusted-tool-output', category: 'ai', type: 'text',
+    prompt: 'A retrieved web page contains instructions telling an assistant to ignore the user and change its task. Which security problem is this?',
+    answer: 'Indirect prompt injection',
+    distractors: ['SQL injection', 'Training-set distillation', 'Token quantization'],
+    fact: 'Instructions embedded in untrusted external content can try to redirect an agent. Treat retrieved content as data and enforce action permissions outside the model.',
+    sources: ['https://genai.owasp.org/llmrisk/llm01-prompt-injection/'],
+  },
+  {
+    id: 'ai-approval-gate', category: 'ai', type: 'text',
+    prompt: 'An agent may draft a production database migration, but an authorized engineer must approve it before execution. Which control is being used?',
+    answer: 'A human-in-the-loop approval gate',
+    distractors: ['A higher sampling temperature', 'A larger context window', 'A different embedding dimension'],
+    fact: 'Human approval creates a checkpoint before a consequential action. Enforce the gate in the application; asking the model to seek approval is not a sufficient security boundary.',
+    sources: ['https://docs.langchain.com/oss/python/langgraph/overview'],
+  },
+  {
+    id: 'ai-rag', category: 'ai', type: 'text',
+    prompt: 'A support bot searches current policy documents and includes relevant passages in its prompt before answering, without updating model weights. What is this pattern?',
+    answer: 'Retrieval-augmented generation (RAG)',
+    distractors: ['Supervised fine-tuning', 'Knowledge distillation', 'Weight quantization'],
+    fact: 'RAG augments generation with retrieved evidence at inference time. It can improve grounding, but does not guarantee that retrieval or the final answer is correct.',
+    sources: ['https://developers.openai.com/api/docs/guides/retrieval', 'https://ai.google.dev/gemini-api/docs/embeddings'],
+  },
+  {
+    id: 'ai-embeddings', category: 'ai', type: 'text',
+    prompt: 'To search by meaning rather than exact words, you map documents and queries into comparable numerical vectors. What are those representations called?',
+    answer: 'Embeddings',
+    distractors: ['System prompts', 'Tool schemas', 'Model checkpoints'],
+    fact: 'Embeddings encode learned relationships as vectors for tasks such as semantic search. Similarity is a retrieval signal, not proof that a passage answers the question.',
+    sources: ['https://developers.openai.com/api/docs/guides/retrieval'],
+  },
+  {
+    id: 'ai-reranking', category: 'ai', type: 'text',
+    prompt: 'Search retrieves 50 candidate passages. A second scoring step reorders them by relevance to the original question before selecting five. What is that step?',
+    answer: 'Reranking',
+    distractors: ['Fine-tuning', 'Tokenization', 'Quantization'],
+    fact: 'Reranking reorders retrieved candidates by a relevance score. It cannot recover a relevant document that was never included in the candidate set.',
+    sources: ['https://ai.google.dev/gemini-api/docs/embeddings'],
+  },
+  {
+    id: 'ai-moe', category: 'ai', type: 'text',
+    prompt: 'A model routes each token through a subset of specialized parameter blocks instead of activating every expert. Which architecture is this?',
+    answer: 'Mixture of experts (MoE)',
+    distractors: ['Retrieval-augmented generation', 'A multi-agent chat room', 'A vector database'],
+    fact: 'MoE activates selected experts per token, so total and active parameter counts differ. Experts are internal model components, not independent chatbot agents.',
+    sources: ['https://openai.com/index/introducing-gpt-oss/'],
+  },
+  {
+    id: 'ai-open-weights', category: 'ai', type: 'text',
+    prompt: 'A model lets you download its trained weights. What must you still inspect before assuming unrestricted commercial use?',
+    answer: 'The release license and any use restrictions',
+    distractors: ['Only the parameter count', 'Only its benchmark score', 'Only its context-window size'],
+    fact: 'Open weights describe access to parameters, not a universal license. Check each release and any upstream model licenses, especially for distilled derivatives.',
+    sources: ['https://github.com/deepseek-ai/DeepSeek-R1'],
+  },
+  {
+    id: 'ai-distillation', category: 'ai', type: 'text',
+    prompt: 'A smaller student model is trained using outputs from a more capable teacher model. What is this technique called?',
+    answer: 'Knowledge distillation',
+    distractors: ['Prompt caching', 'Semantic search', 'Context truncation'],
+    fact: 'Distillation transfers behaviors through training examples or other teacher signals. DeepSeek-R1 released distilled models based on Qwen and Llama architectures in 2025.',
+    sources: ['https://github.com/deepseek-ai/DeepSeek-R1'],
+  },
+  {
+    id: 'ai-evals', category: 'ai', type: 'text',
+    prompt: 'Before replacing your support bot\'s model, you run both versions on held-out realistic tasks and compare correctness, cost, and latency. What are you running?',
+    answer: 'Task-specific evaluations',
+    distractors: ['A tokenizer migration', 'A parameter merge', 'An embedding index rebuild'],
+    fact: 'Representative evaluations test whether a change improves your actual workload. A public leaderboard rank alone cannot establish that a model is best for your application.',
+    sources: ['https://www.anthropic.com/engineering/building-effective-agents'],
+  },
+  {
+    id: 'ai-context-window', category: 'ai', type: 'text',
+    prompt: 'An assistant can fit a long conversation into one request. Does that alone mean it will remember the same information in a new session?',
+    answer: 'No, durable memory requires additional state management',
+    distractors: ['Yes, all input permanently updates its weights', 'Yes, a large context window is a database', 'Yes, tokens automatically persist across sessions'],
+    fact: 'A context window is a per-request capacity, not permanent storage or training. Applications manage any retained history, summaries, and cross-session memory.',
+    sources: ['https://docs.langchain.com/oss/python/langgraph/overview'],
+  },
+  {
+    id: 'ai-model-routing', category: 'ai', type: 'text',
+    prompt: 'Easy requests go to a fast inexpensive model; difficult requests are escalated to a more capable one. Which application pattern is this?',
+    answer: 'Model routing',
+    distractors: ['Weight quantization', 'Knowledge distillation', 'Token merging'],
+    fact: 'Routing trades off capability, cost, and latency using the task. Unlike MoE routing inside a model, application-level routing chooses which model or workflow to call.',
+    sources: ['https://www.anthropic.com/engineering/building-effective-agents'],
+  },
+  {
+    id: 'ai-orchestrator', category: 'ai', type: 'text',
+    prompt: 'A coordinator dynamically splits a research request into subtasks, delegates them to specialist workers, then combines their findings. Which pattern is this?',
+    answer: 'Orchestrator-workers',
+    distractors: ['A fixed tokenizer pipeline', 'A single embedding lookup', 'Supervised pretraining'],
+    fact: 'The orchestrator chooses subtasks from the actual input rather than following a fixed list. More workers can add overhead and do not automatically improve quality.',
+    sources: ['https://www.anthropic.com/engineering/building-effective-agents'],
+  },
+  {
+    id: 'ai-gpt-oss', category: 'ai', type: 'text',
+    prompt: 'Which organization released the gpt-oss-120b and gpt-oss-20b open-weight models in August 2025?',
+    answer: 'OpenAI',
+    distractors: ['Anthropic', 'Google DeepMind', 'Meta'],
+    fact: 'OpenAI released the gpt-oss models on August 5, 2025 under Apache 2.0. They are open-weight language models; that does not make every OpenAI model open-weight.',
+    sources: ['https://openai.com/index/introducing-gpt-oss/'],
+  },
+  {
+    id: 'ai-claude-family', category: 'ai', type: 'text',
+    prompt: 'Claude models and the Claude Code coding agent come from which organization?',
+    answer: 'Anthropic',
+    distractors: ['OpenAI', 'Meta', 'Alibaba Cloud'],
+    fact: 'Claude is Anthropic\'s model family. Claude Code is an agentic coding product that uses models and tools; a model and an agent product are not the same thing.',
+    sources: ['https://platform.claude.com/docs/en/docs/about-claude/models/overview', 'https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills'],
+  },
+  {
+    id: 'ai-qwen-family', category: 'ai', type: 'text',
+    prompt: 'Which organization develops the Qwen model family, including the Qwen3 models released in 2025?',
+    answer: 'Alibaba Cloud',
+    distractors: ['Google DeepMind', 'Anthropic', 'OpenAI'],
+    fact: 'The Qwen team at Alibaba Cloud develops Qwen. Its 2025 Qwen3 releases include dense and mixture-of-experts models; the family name alone does not specify architecture or size.',
+    sources: ['https://github.com/QwenLM/Qwen3'],
+  },
+  {
+    id: 'ai-r1-zero', category: 'ai', type: 'text',
+    prompt: 'In DeepSeek\'s 2025 R1 release, which variant explored reasoning through reinforcement learning without a preliminary supervised fine-tuning stage?',
+    answer: 'DeepSeek-R1-Zero',
+    distractors: ['DeepSeek-R1', 'DeepSeek-R1-Distill-Qwen-7B', 'DeepSeek-R1-Distill-Llama-8B'],
+    fact: 'R1-Zero explored RL without preliminary SFT. R1 itself added cold-start data and supervised stages, so saying that all R1 models skipped SFT would be incorrect.',
+    sources: ['https://github.com/deepseek-ai/DeepSeek-R1'],
+  },
+  {
+    id: 'ai-current-openai', category: 'ai', type: 'text',
+    prompt: 'On 2026-10-16, which model did OpenAI\'s catalog recommend for its most demanding reasoning and coding workloads?',
+    answer: 'GPT-6 Astra',
+    distractors: ['GPT-6.1 Sol', 'GPT-6 Luna', 'gpt-oss-20b'],
+    fact: 'The catalog described Astra for demanding work, Sol for balancing capability and cost, and Luna for efficient high-volume tasks. This question is a dated catalog snapshot, not a permanent ranking.',
+    sources: ['https://developers.openai.com/api/docs/models'],
+  },
+  {
+    id: 'ai-current-claude', category: 'ai', type: 'text',
+    prompt: 'On 2026-10-16, which model in Anthropic\'s comparison table was positioned for high-volume, latency-sensitive classification, extraction, and routing?',
+    answer: 'Claude Haiku 5.5',
+    distractors: ['Claude Fable 5.1', 'Claude Opus 5.5', 'Claude Sonnet 5.5'],
+    fact: 'The comparison table positioned Haiku 5.5 for these latency-sensitive tasks. Actual performance depends on prompts, thinking effort, and workload; measure it rather than assuming a universal winner.',
+    sources: ['https://platform.claude.com/docs/en/docs/about-claude/models/overview'],
+  },
+  {
+    id: 'ai-current-gemini', category: 'ai', type: 'text',
+    prompt: 'On 2026-10-16, which model was listed in Google\'s Gemini API catalog as its Gemini 4 flagship reasoning model?',
+    answer: 'Gemini 4 Argon',
+    distractors: ['Gemini 3.8 Flash', 'Gemini 2.5 Pro', 'Gemini Embedding 2'],
+    fact: 'The October 2026 catalog listed Gemini 4 Argon as a stable reasoning model. Gemini Embedding 2 is an embedding model, not a general-purpose conversational reasoning model.',
+    sources: ['https://ai.google.dev/gemini-api/docs/models'],
+  },
+  {
+    id: 'ai-multimodal-embedding', category: 'ai', type: 'text',
+    prompt: 'Gemini Embedding 2 maps text, images, video, audio, and PDFs into a shared representation. What kind of output does this model produce?',
+    answer: 'Numerical embedding vectors',
+    distractors: ['A generated video', 'A spoken conversation', 'A fine-tuned model checkpoint'],
+    fact: 'Multimodal embeddings support cross-modal retrieval and comparison. In Google\'s documentation, the Embedding 2 and Embedding 001 vector spaces are incompatible, so migrating requires re-embedding existing data.',
+    sources: ['https://ai.google.dev/gemini-api/docs/embeddings'],
+  },
+];
+
+export const ALL_QUESTIONS: RawQuestion[] = [...languages, ...frameworks, ...companies, ...bugs, ...funny, ...incidents, ...ai]
+  .map((question) => ({ ...question, reviewedOn: CONTENT_REVIEWED_ON }));
 
 /** Distinct answer pools per category, used to generate distractor options. */
 export const ANSWER_POOLS: Record<Category, string[]> = {
@@ -2041,4 +2382,6 @@ export const ANSWER_POOLS: Record<Category, string[]> = {
   // Bug questions derive their line-number options per game (see buildBugQuestion).
   bug: [],
   funny: Array.from(new Set(funny.map((q) => q.answer))),
+  incident: Array.from(new Set(incidents.flatMap((question) => [question.answer, ...(question.distractors ?? [])]))),
+  ai: Array.from(new Set(ai.flatMap((question) => [question.answer, ...(question.distractors ?? [])]))),
 };

@@ -19,12 +19,12 @@ const rooms = new Map<string, Room>();
 export const DEFAULT_SETTINGS: RoomSettings = {
   rounds: 8,
   roundTime: 20,
-  categories: ['language', 'framework', 'company', 'bug', 'funny'],
+  categories: ['language', 'framework', 'company', 'bug', 'funny', 'incident', 'ai'],
   progressiveReveal: true,
   powerUps: false,
 };
 
-const VALID_CATEGORIES: Category[] = ['language', 'framework', 'company', 'bug', 'funny'];
+const VALID_CATEGORIES: Category[] = ['language', 'framework', 'company', 'bug', 'funny', 'incident', 'ai'];
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -38,10 +38,11 @@ function shuffle<T>(arr: T[]): T[] {
 /** Build a playable question with 4 shuffled options (1 correct + 3 distractors). */
 function buildQuestion(raw: RawQuestion): Question {
   if (raw.category === 'bug') return buildBugQuestion(raw);
-  const pool = ANSWER_POOLS[raw.category].filter((a) => a !== raw.answer);
+  const { distractors: authoredDistractors, ...question } = raw;
+  const pool = (authoredDistractors ?? ANSWER_POOLS[raw.category]).filter((answer) => answer !== raw.answer);
   const distractors = shuffle(pool).slice(0, 3);
   const options = shuffle([raw.answer, ...distractors]);
-  return { ...raw, options };
+  return { ...question, options };
 }
 
 /** Build a "spot the bug" question whose options are line numbers drawn from
@@ -408,6 +409,7 @@ export function toPublicQuestion(q: Question): PublicQuestion {
     prompt: q.prompt,
     options: q.options,
     code: q.code,
+    incident: q.incident,
     highlight: q.highlight,
     slug: q.slug,
     color: q.color,

@@ -21,6 +21,8 @@ const CATEGORY_LABEL: Record<Category, string> = {
   company: 'Guess the company',
   bug: 'Spot the bug',
   funny: 'Name the ritual',
+  incident: 'Production incident',
+  ai: 'AI, models & agents',
 };
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -169,7 +171,7 @@ export default function Game({ room, playerId, round, result, onLeave }: Props) 
   // sharpening to fully clear by roughly the half-way mark so early guesses are
   // riskier but worth more points. Clears once the player has locked in.
   const obscure =
-    room.settings.progressiveReveal && !result && !answered
+    room.settings.progressiveReveal && question.type !== 'incident' && question.category !== 'ai' && !result && !answered
       ? Math.max(0, Math.min(1, (progress - 0.5) / 0.5))
       : 0;
   const codeBlur = obscure * 6;
@@ -278,8 +280,28 @@ export default function Game({ room, playerId, round, result, onLeave }: Props) 
           </div>
         )}
 
-        <div className={`stage ${smoked ? 'smoked' : ''}`}>
-          {question.type === 'code' ? (
+        {question.type === 'code' && <h2 className="question-prompt">{question.prompt}</h2>}
+
+        <div className={`stage stage-${question.category} ${smoked ? 'smoked' : ''}`}>
+          {question.type === 'incident' ? (
+            <div
+              className="incident-stage"
+              style={{ filter: smoked ? `blur(${codeFilter.toFixed(1)}px)` : undefined }}
+            >
+              <h2 className="incident-symptom">{question.prompt}</h2>
+              <h3>Logs</h3>
+              <pre className="incident-logs"><code>{question.incident?.logs}</code></pre>
+              <h3>Deployed diff</h3>
+              <pre className="incident-diff"><code>
+                {question.incident?.diff.split('\n').map((line, index) => (
+                  <span
+                    key={index}
+                    className={line.startsWith('+') ? 'diff-added' : line.startsWith('-') ? 'diff-removed' : undefined}
+                  >{line}{'\n'}</span>
+                ))}
+              </code></pre>
+            </div>
+          ) : question.type === 'code' ? (
             <SyntaxHighlighter
               language={question.highlight || 'text'}
               style={oneDark}
@@ -378,7 +400,12 @@ export default function Game({ room, playerId, round, result, onLeave }: Props) 
                 <span className="reveal-miss">no points</span>
               )}
             </div>
-            {result.fact && <div className="reveal-fact">💡 {result.fact}</div>}
+            {result.fact && (
+              <div className="reveal-fact">
+                {question.category === 'incident' && <strong>Incident review: </strong>}
+                {result.fact}
+              </div>
+            )}
             <div className="reveal-next">Next round starting…</div>
           </div>
         ) : (

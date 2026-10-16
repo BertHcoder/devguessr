@@ -67,8 +67,8 @@ export default function Home({
         </h1>
         <p className="hero-sub">
           A GeoGuessr for engineers. Spot the <strong>language</strong>, name the{' '}
-          <strong>framework</strong>, unmask the <strong>company</strong>, and call out the{' '}
-          <strong>meeting</strong> faster than your friends.
+          <strong>framework</strong>, unmask the <strong>company</strong>, and diagnose the{' '}
+          <strong>production incident</strong> faster than your friends.
         </p>
         <div className="hero-pills">
           <span className="pill pill-language">{'</> language'}</span>
@@ -76,6 +76,8 @@ export default function Home({
           <span className="pill pill-company">★ company</span>
           <span className="pill pill-bug">🐛 spot the bug</span>
           <span className="pill pill-funny">🎭 name the ritual</span>
+          <span className="pill pill-incident">! production incident</span>
+          <span className="pill pill-ai">AI models &amp; agents</span>
         </div>
       </div>
 
@@ -135,6 +137,28 @@ export default function Home({
       <div className="link-row">
         <RepoLink />
         <SupportLink />
+        <a
+          className="support-link"
+          href="https://itaanhuys.com/en/projects/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg
+            className="support-icon"
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <ellipse cx="12" cy="12" rx="4" ry="9" />
+            <path d="M3 12h18" />
+          </svg>
+          <span>IT aan Huys projects</span>
+        </a>
       </div>
     </div>
   );
