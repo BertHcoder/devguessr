@@ -7,3 +7,4 @@ build/
 .DS_Store
 .vscode/
 .wrangler/
+server/worker-configuration.d.ts

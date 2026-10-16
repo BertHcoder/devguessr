@@ -27,6 +27,7 @@ export default function App() {
   const [summary, setSummary] = useState<GameSummary | null>(null);
   const [profile, setProfile] = useState<PlayerProfile>(() => readProfile());
   const [editorOpen, setEditorOpen] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Per-game accumulators (this player only) used to build the end-of-game summary.
   const correctRef = useRef(0);
@@ -38,9 +39,18 @@ export default function App() {
       setConnected(true);
       setPlayerId(socket.id ?? null);
     };
-    const onDisconnect = () => setConnected(false);
+    const onDisconnect = () => {
+      setConnected(false);
+      setRoom(null);
+      setRound(null);
+      setResult(null);
+      setFinalBoard(null);
+      setSummary(null);
+    };
+    const onError = (error: { message: string }) => setConnectionError(error.message);
     const onRoomUpdate = (r: PublicRoom) => {
       setRoom(r);
+      setConnectionError(null);
       if (r.status === 'lobby') {
         setRound(null);
         setResult(null);
@@ -99,6 +109,7 @@ export default function App() {
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
+    socket.on('error', onError);
     socket.on('room:update', onRoomUpdate);
     socket.on('round:start', onRoundStart);
     socket.on('round:result', onRoundResult);
@@ -107,6 +118,7 @@ export default function App() {
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
+      socket.off('error', onError);
       socket.off('room:update', onRoomUpdate);
       socket.off('round:start', onRoundStart);
       socket.off('round:result', onRoundResult);
@@ -193,7 +205,10 @@ export default function App() {
           </span>
         </div>
       </header>
-      <main className="content">{view}</main>
+      <main className="content">
+        {connectionError && <p className="error" role="alert">{connectionError}</p>}
+        {view}
+      </main>
       {editorOpen && (
         <ProfileEditor
           initial={profile}

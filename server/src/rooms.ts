@@ -1,4 +1,3 @@
-import { customAlphabet } from 'nanoid';
 import { ALL_QUESTIONS, ANSWER_POOLS, type RawQuestion } from './gameData.js';
 import type {
   Category,
@@ -12,9 +11,10 @@ import type {
   RoomSettings,
 } from './types.js';
 
-const makeCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 4);
-
-const rooms = new Map<string, Room>();
+export function makeCode(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from(crypto.getRandomValues(new Uint8Array(4)), (n) => alphabet[n % alphabet.length]).join('');
+}
 
 export const DEFAULT_SETTINGS: RoomSettings = {
   rounds: 8,
@@ -79,11 +79,8 @@ function pickQuestions(
   return [...fresh, ...seen].slice(0, Math.min(count, pool.length)).map(buildQuestion);
 }
 
-export function createRoom(): Room {
-  let code = makeCode();
-  while (rooms.has(code)) code = makeCode();
-
-  const room: Room = {
+export function createRoom(code = makeCode()): Room {
+  return {
     code,
     status: 'lobby',
     settings: { ...DEFAULT_SETTINGS },
@@ -93,23 +90,8 @@ export function createRoom(): Room {
     recentQuestionIds: [],
     roundIndex: -1,
     endsAt: 0,
-    timer: null,
-    revealTimer: null,
+    revealEndsAt: 0,
   };
-  rooms.set(code, room);
-  return room;
-}
-
-export function getRoom(code: string): Room | undefined {
-  return rooms.get(code?.toUpperCase());
-}
-
-export function deleteRoom(code: string): void {
-  const room = rooms.get(code);
-  if (!room) return;
-  if (room.timer) clearTimeout(room.timer);
-  if (room.revealTimer) clearTimeout(room.revealTimer);
-  rooms.delete(code);
 }
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
@@ -253,7 +235,7 @@ export function submitAnswer(room: Room, playerId: string, choice: number): bool
   const player = room.players.get(playerId);
   const q = currentQuestion(room);
   if (!player || !q || room.status !== 'playing' || player.answered) return false;
-  if (choice < 0 || choice >= q.options.length) return false;
+  if (!Number.isInteger(choice) || choice < 0 || choice >= q.options.length || Date.now() >= room.endsAt) return false;
 
   player.answered = true;
   player.choice = choice;
@@ -262,7 +244,7 @@ export function submitAnswer(room: Room, playerId: string, choice: number): bool
   if (correct) {
     const total = room.settings.roundTime * 1000;
     const remaining = Math.max(0, room.endsAt - Date.now());
-    const speedRatio = total > 0 ? remaining / total : 0;
+    const speedRatio = total > 0 ? Math.min(1, remaining / total) : 0;
     const base = 500 + Math.round(500 * speedRatio); // 500–1000 for correct
     player.streak += 1;
     const streakBonus = Math.min(250, (player.streak - 1) * 50);
@@ -317,7 +299,7 @@ export function usePowerup(room: Room, playerId: string, type: PowerupType): Pow
   const player = room.players.get(playerId);
   const q = currentQuestion(room);
   if (!room.settings.powerUps) return { ok: false, error: 'Power-ups are off.' };
-  if (!player || !q || room.status !== 'playing') return { ok: false, error: 'Not available right now.' };
+  if (!player || !q || room.status !== 'playing' || Date.now() >= room.endsAt) return { ok: false, error: 'Not available right now.' };
   const ALL_TYPES: PowerupType[] = ['fifty', 'shield', 'smoke', 'double', 'freeze', 'spy'];
   if (!ALL_TYPES.includes(type)) return { ok: false, error: 'Unknown power-up.' };
   if (player.usedPowerups.includes(type)) return { ok: false, error: 'Already used this round.' };
@@ -342,7 +324,7 @@ export function usePowerup(room: Room, playerId: string, type: PowerupType): Pow
     player.doubleDown = true;
   }
   if (type === 'freeze') {
-    // Extend this player's personal deadline by 5 seconds.
+    // The deadline is shared by everyone in the room.
     room.endsAt += 5000;
     return { ok: true, type, newEndsAt: room.endsAt };
   }

@@ -109,8 +109,7 @@ export interface Room {
   roundIndex: number;
   /** Timestamp (ms) when the current round ends. */
   endsAt: number;
-  timer: NodeJS.Timeout | null;
-  revealTimer: NodeJS.Timeout | null;
+  revealEndsAt: number;
 }
 
 /** Public, serializable view of a player. */

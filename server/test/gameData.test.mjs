@@ -11,7 +11,6 @@ import {
   createRoom,
   currentQuestion,
   DEFAULT_SETTINGS,
-  deleteRoom,
   startGame,
   submitAnswer,
   toPublicQuestion,
@@ -65,87 +64,75 @@ test('every category generates four unique playable choices without revealing pr
   assert.ok(DEFAULT_SETTINGS.categories.includes('ai'));
   for (const category of DEFAULT_SETTINGS.categories) {
     const room = createRoom();
-    try {
-      applySettings(room, { categories: [category], rounds: 20 });
-      const authoredQuestions = ALL_QUESTIONS.filter((question) => question.category === category);
-      const visited = new Set();
-      for (let game = 0; game < Math.ceil(authoredQuestions.length / 20); game++) {
-        room.recentQuestionIds = [...visited];
-        startGame(room);
-        assert.ok(room.questions.length > 0, category);
-        for (const question of room.questions) {
-          visited.add(question.id);
-          assert.equal(question.category, category);
-          assert.equal(question.options.length, 4, question.id);
-          assert.equal(new Set(question.options).size, 4, question.id);
-          assert.ok(question.options.includes(question.answer), question.id);
-          const publicQuestion = JSON.parse(JSON.stringify(toPublicQuestion(question)));
-          for (const privateField of ['answer', 'bugLine', 'fact', 'distractors', 'sources', 'reviewedOn']) {
-            assert.equal(Object.hasOwn(publicQuestion, privateField), false, question.id);
-          }
-          if (question.incident) assert.deepEqual(publicQuestion.incident, question.incident);
-          if (category === 'incident' || category === 'ai') {
-            const authored = ALL_QUESTIONS.find((raw) => raw.id === question.id);
-            assert.deepEqual([...question.options].sort(), [authored.answer, ...authored.distractors].sort());
-          }
+    applySettings(room, { categories: [category], rounds: 20 });
+    const authoredQuestions = ALL_QUESTIONS.filter((question) => question.category === category);
+    const visited = new Set();
+    for (let game = 0; game < Math.ceil(authoredQuestions.length / 20); game++) {
+      room.recentQuestionIds = [...visited];
+      startGame(room);
+      assert.ok(room.questions.length > 0, category);
+      for (const question of room.questions) {
+        visited.add(question.id);
+        assert.equal(question.category, category);
+        assert.equal(question.options.length, 4, question.id);
+        assert.equal(new Set(question.options).size, 4, question.id);
+        assert.ok(question.options.includes(question.answer), question.id);
+        const publicQuestion = JSON.parse(JSON.stringify(toPublicQuestion(question)));
+        for (const privateField of ['answer', 'bugLine', 'fact', 'distractors', 'sources', 'reviewedOn']) {
+          assert.equal(Object.hasOwn(publicQuestion, privateField), false, question.id);
+        }
+        if (question.incident) assert.deepEqual(publicQuestion.incident, question.incident);
+        if (category === 'incident' || category === 'ai') {
+          const authored = ALL_QUESTIONS.find((raw) => raw.id === question.id);
+          assert.deepEqual([...question.options].sort(), [authored.answer, ...authored.distractors].sort());
         }
       }
-      assert.equal(visited.size, authoredQuestions.length, category);
-    } finally {
-      deleteRoom(room.code);
     }
+    assert.equal(visited.size, authoredQuestions.length, category);
   }
 });
 
 test('incident rounds use authoritative scoring and normal round completion', () => {
   const room = createRoom();
-  try {
-    applySettings(room, { categories: ['incident'], rounds: 6, powerUps: true });
-    addPlayer(room, 'correct-player', 'Correct');
-    addPlayer(room, 'wrong-player', 'Wrong');
-    startGame(room);
-    assert.equal(room.questions.length, 6);
-    assert.equal(new Set(room.questions.map((question) => question.id)).size, 6);
-    for (let index = 0; index < 6; index++) {
-      assert.equal(beginRound(room), true);
-      const question = currentQuestion(room);
-      const correctIndex = question.options.indexOf(question.answer);
-      const wrongIndex = question.options.findIndex((choice) => choice !== question.answer);
-      const player = room.players.get('correct-player');
-      const scoreBefore = player.score;
-      assert.equal(submitAnswer(room, player.id, correctIndex), true);
-      assert.ok(player.lastPoints >= 500);
-      assert.equal(player.score, scoreBefore + player.lastPoints);
-      assert.equal(submitAnswer(room, player.id, wrongIndex), false);
-      assert.equal(allAnswered(room), false);
-      assert.equal(submitAnswer(room, 'wrong-player', wrongIndex), true);
-      assert.equal(room.players.get('wrong-player').lastPoints, 0);
-      assert.equal(allAnswered(room), true);
-    }
-    assert.equal(beginRound(room), false);
-    assert.equal(room.status, 'over');
-  } finally {
-    deleteRoom(room.code);
+  applySettings(room, { categories: ['incident'], rounds: 6, powerUps: true });
+  addPlayer(room, 'correct-player', 'Correct');
+  addPlayer(room, 'wrong-player', 'Wrong');
+  startGame(room);
+  assert.equal(room.questions.length, 6);
+  assert.equal(new Set(room.questions.map((question) => question.id)).size, 6);
+  for (let index = 0; index < 6; index++) {
+    assert.equal(beginRound(room), true);
+    const question = currentQuestion(room);
+    const correctIndex = question.options.indexOf(question.answer);
+    const wrongIndex = question.options.findIndex((choice) => choice !== question.answer);
+    const player = room.players.get('correct-player');
+    const scoreBefore = player.score;
+    assert.equal(submitAnswer(room, player.id, correctIndex), true);
+    assert.ok(player.lastPoints >= 500);
+    assert.equal(player.score, scoreBefore + player.lastPoints);
+    assert.equal(submitAnswer(room, player.id, wrongIndex), false);
+    assert.equal(allAnswered(room), false);
+    assert.equal(submitAnswer(room, 'wrong-player', wrongIndex), true);
+    assert.equal(room.players.get('wrong-player').lastPoints, 0);
+    assert.equal(allAnswered(room), true);
   }
+  assert.equal(beginRound(room), false);
+  assert.equal(room.status, 'over');
 });
 
 test('50/50 never removes the incident root cause', () => {
   const room = createRoom();
-  try {
-    applySettings(room, { categories: ['incident'], rounds: 6, powerUps: true });
-    const player = addPlayer(room, 'player', 'Player');
-    startGame(room);
-    for (const question of room.questions) {
-      beginRound(room);
-      player.score = 1000;
-      const result = usePowerup(room, player.id, 'fifty');
-      assert.equal(result.ok, true);
-      assert.equal(result.hiddenIndices.length, 2);
-      assert.equal(result.hiddenIndices.includes(question.options.indexOf(question.answer)), false);
-      assert.equal(player.score, 880);
-    }
-  } finally {
-    deleteRoom(room.code);
+  applySettings(room, { categories: ['incident'], rounds: 6, powerUps: true });
+  const player = addPlayer(room, 'player', 'Player');
+  startGame(room);
+  for (const question of room.questions) {
+    beginRound(room);
+    player.score = 1000;
+    const result = usePowerup(room, player.id, 'fifty');
+    assert.equal(result.ok, true);
+    assert.equal(result.hiddenIndices.length, 2);
+    assert.equal(result.hiddenIndices.includes(question.options.indexOf(question.answer)), false);
+    assert.equal(player.score, 880);
   }
 });
 
@@ -220,27 +207,39 @@ test('JavaScript bug examples reproduce the defect and the indicated line repair
 
 test('AI rounds support scoring, replay variety, and 50/50 without hiding the correct concept', () => {
   const room = createRoom();
-  try {
-    applySettings(room, { categories: ['ai'], rounds: 8, powerUps: true });
-    const player = addPlayer(room, 'ai-player', 'AI player');
-    startGame(room);
-    const firstGame = new Set(room.questions.map((question) => question.id));
-    for (const question of room.questions) {
-      beginRound(room);
-      player.score = 1000;
-      const correctIndex = question.options.indexOf(question.answer);
-      const powerup = usePowerup(room, player.id, 'fifty');
-      assert.equal(powerup.ok, true);
-      assert.equal(powerup.hiddenIndices.length, 2);
-      assert.equal(powerup.hiddenIndices.includes(correctIndex), false);
-      assert.equal(submitAnswer(room, player.id, correctIndex), true);
-      assert.ok(player.lastPoints >= 500);
-      assert.equal(allAnswered(room), true);
-    }
-    assert.equal(beginRound(room), false);
-    startGame(room);
-    assert.ok(room.questions.every((question) => !firstGame.has(question.id)));
-  } finally {
-    deleteRoom(room.code);
+  applySettings(room, { categories: ['ai'], rounds: 8, powerUps: true });
+  const player = addPlayer(room, 'ai-player', 'AI player');
+  startGame(room);
+  const firstGame = new Set(room.questions.map((question) => question.id));
+  for (const question of room.questions) {
+    beginRound(room);
+    player.score = 1000;
+    const correctIndex = question.options.indexOf(question.answer);
+    const powerup = usePowerup(room, player.id, 'fifty');
+    assert.equal(powerup.ok, true);
+    assert.equal(powerup.hiddenIndices.length, 2);
+    assert.equal(powerup.hiddenIndices.includes(correctIndex), false);
+    assert.equal(submitAnswer(room, player.id, correctIndex), true);
+    assert.ok(player.lastPoints >= 500);
+    assert.equal(allAnswered(room), true);
   }
+  assert.equal(beginRound(room), false);
+  startGame(room);
+  assert.ok(room.questions.every((question) => !firstGame.has(question.id)));
+});
+
+test('expired deadlines reject answers and power-ups, and freeze cannot inflate speed scoring', () => {
+  const room = createRoom();
+  applySettings(room, { powerUps: true });
+  const player = addPlayer(room, 'player', 'Player');
+  startGame(room);
+  beginRound(room);
+  player.score = 1000;
+  const choice = currentQuestion(room).options.indexOf(currentQuestion(room).answer);
+  room.endsAt = Date.now() - 1;
+  assert.equal(submitAnswer(room, player.id, choice), false);
+  assert.equal(usePowerup(room, player.id, 'freeze').ok, false);
+  room.endsAt = Date.now() + room.settings.roundTime * 1000 + 5000;
+  assert.equal(submitAnswer(room, player.id, choice), true);
+  assert.equal(player.lastPoints, 1000);
 });

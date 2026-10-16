@@ -1,7 +1,0 @@
-{
-  "name": "devguessr",
-  "main": "worker.js",
-  "compatibility_date": "2026-09-12",
-  // Custom domain: Cloudflare creates the DNS record and certificate for this hostname.
-  "routes": [{ "pattern": "devguessr.itaanhuys.com", "custom_domain": true }],
-}

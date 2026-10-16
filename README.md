@@ -35,13 +35,15 @@ You can also play **solo** (just start a room by yourself) to practice.
 ## Tech stack
 
 - **Client** Vite + React + TypeScript, `react-syntax-highlighter`, `canvas-confetti`
-- **Server** Node.js + Express + Socket.IO (authoritative round timers & scoring)
+- **Server** Cloudflare Worker + one SQLite-backed Durable Object per room
+- **Multiplayer** Native WebSockets with hibernation, persisted game state, and authoritative alarm-based timers & scoring
 - Logos rendered via the [Simple Icons](https://simpleicons.org) CDN
 
 ```
 guessr/
-├─ server/   # Socket.IO game server (rooms, questions, scoring)
-└─ client/   # React front-end
+├─ server/          # Worker, Durable Object rooms, questions, scoring, tests
+├─ client/          # React front-end
+└─ wrangler.jsonc   # Static assets + multiplayer, deployed together
 ```
 
 ## Getting started
@@ -50,38 +52,66 @@ From the project root:
 
 ```bash
 npm install        # installs root + server + client dependencies
-npm run dev        # starts the server (:3001) and client (:5173) together
+npm run dev        # builds initial assets, then starts Wrangler (:3001) + Vite (:5173)
 ```
 
 Then open **http://localhost:5173**. To play with others on your network, share your
-machine's LAN URL (Vite prints it) they connect to the same server.
+machine's LAN URL (Vite prints it); they connect to the same server.
 
-> The client talks to the server at `http://localhost:3001` by default. Override with a
-> `VITE_SERVER_URL` env var when deploying.
+The client always uses the website's own origin. Vite proxies `/api` (including WebSockets)
+and `/health` to Wrangler locally, so LAN clients work without a separate server URL.
+Node.js 22 or later is required for development.
 
 ## Deployment
 
-The game runs as a single Node web service on [Render](https://render.com) (see
-[`render.yaml`](render.yaml)): the server serves both the Socket.IO API and the built client
-at `devguessr.onrender.com`.
+The entire application runs on **Cloudflare** at **https://devguessr.itaanhuys.com**:
 
-**https://devguessr.itaanhuys.com** is a small Cloudflare Worker ([`cloudflare/`](cloudflare))
-on a custom domain that forwards every request, WebSockets included, to that Render service.
-Cloudflare manages the DNS record and certificate. Game changes only need a Render deploy; the
-Worker only needs redeploying if [`cloudflare/worker.js`](cloudflare/worker.js) changes:
+- Workers Static Assets serves the built client directly.
+- `/api/rooms/new` creates a room over a native WebSocket; `/api/rooms/CODE` joins one.
+- Each room has its own Durable Object, sharing state across players and Cloudflare locations.
+- Room state is saved before events are sent. Hibernating WebSockets retain their player IDs.
+- Durable Object alarms advance rounds and reveals, including extended freeze deadlines.
+- The last player's departure deletes the room's state and alarm. Unclaimed rooms expire.
+- `/health` reports Worker availability. Unknown API paths return errors, never the SPA.
 
-```bash
-npx wrangler deploy --config cloudflare/wrangler.jsonc
+Cloudflare manages the custom domain's DNS record and certificate. There is no separate
+game-server host, proxy origin, container, or server URL environment variable.
+Unlike a static-only site, multiplayer uses Durable Objects and is subject to Cloudflare's
+Workers/Durable Objects plan limits and pricing.
+
+From the repository root, authenticate once and deploy both parts together:
+
+```sh
+npx wrangler login
+npm run check
+npm test
+npm run deploy
 ```
+
+[`wrangler.jsonc`](wrangler.jsonc) includes the SQLite Durable Object migration. Keep applied
+migration tags intact in future updates. Local state lives in the ignored `.wrangler/` directory;
+it is neither committed nor uploaded. Worker types are generated locally by Wrangler.
+
+The [deployment workflow](.github/workflows/deploy.yml) checks and tests pull requests, then
+deploys pushes to `main`. Configure the repository secrets `CLOUDFLARE_API_TOKEN` (Workers
+deployment permissions) and `CLOUDFLARE_ACCOUNT_ID` before relying on automatic deployment.
+Local OAuth login does not configure GitHub Actions secrets.
+
+Hibernation preserves a connected game. An actual network disconnect removes that player
+and transfers host ownership if needed; the client returns home with an error and retries
+server availability. Rejoin while the room is still in the lobby, or start a new room.
+Live connections may disconnect during deployments, so deploy between games.
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Run client + server in watch mode |
-| `npm run build` | Type-check and build both packages |
-| `npm test` | Build the server and run content, serialization, and gameplay regression tests |
-| `npm start` | Run the built server |
+| Command          | Description |
+| ---------------- | ----------- |
+| `npm run dev`    | Run Vite + the local Cloudflare runtime in watch mode |
+| `npm run check`  | Generate Worker types and type-check both packages |
+| `npm run build`  | Type-check and build both packages |
+| `npm test`       | Build and run content + real Cloudflare-runtime multiplayer tests |
+| `npm start`      | Build and serve the complete app locally on port 3001 |
+| `npm run deploy` | Build and deploy the complete app to Cloudflare |
 
 ## Adding questions
 
@@ -118,6 +148,11 @@ checks packaged logo availability and review metadata, and verifies AI scoring,
 replay variety, and 50/50 behavior. It also executes the JavaScript bug demonstrations
 before and after their indicated repairs. Other languages were reviewed manually;
 this is not a compilation test of every language or a live CDN availability check.
+
+The Cloudflare integration tests use Wrangler's local Workers runtime, including the real
+Durable Object binding and static-asset routing. They cover room isolation, host permissions,
+capacity, malformed messages, hibernation, scoring, timed reveals, freeze extensions, game
+completion, restart, host transfer, and empty-room cleanup.
 
 ---
 
