@@ -410,6 +410,8 @@ input { font-family: inherit; }
   text-shadow: 0 0 24px rgba(var(--accent-rgb), 0.4);
 }
 .code-hint { color: var(--muted); font-size: 0.85rem; }
+.code-hint.copied { color: var(--green); font-weight: 700; }
+.code-hint.failed { color: var(--amber); font-weight: 700; }
 .lobby-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.2rem; }
 .player-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .player-row {
@@ -461,6 +463,25 @@ input { font-family: inherit; }
 .cat-chip.active { color: var(--text); border-color: var(--primary-2); background: rgba(var(--primary-rgb), 0.16); }
 .cat-chip:disabled { opacity: 0.7; cursor: default; }
 .cat-icon { font-family: 'JetBrains Mono', monospace; }
+
+.preset-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.5rem; }
+.preset {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--muted);
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.preset:hover:not(:disabled) { border-color: var(--primary-2); transform: translateY(-1px); }
+.preset.active { color: var(--text); border-color: var(--primary-2); background: rgba(var(--primary-rgb), 0.16); }
+.preset:disabled { opacity: 0.7; cursor: default; }
+.preset.active:disabled { opacity: 1; }
+.preset-icon { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; line-height: 1.2; }
+.preset-label { font-weight: 800; font-size: 0.9rem; color: var(--text); }
+.preset-desc { font-size: 0.75rem; line-height: 1.3; }
 
 .setting-hint { color: var(--muted); font-size: 0.78rem; line-height: 1.4; }
 .toggle {
@@ -798,6 +819,10 @@ input { font-family: inherit; }
   animation: flashPop 0.3s ease, flashOut 0.4s ease 2.2s forwards;
 }
 .powerup-flash .pf-icon { font-size: 1.3rem; line-height: 1; }
+.powerup-flash.error {
+  background: linear-gradient(135deg, rgba(242, 88, 78, 0.96), rgba(242, 88, 78, 0.78));
+  color: #fff;
+}
 @keyframes flashPop {
   0% { opacity: 0; transform: translate(-50%, -14px) scale(0.9); }
   60% { transform: translate(-50%, 0) scale(1.05); }

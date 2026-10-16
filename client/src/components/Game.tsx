@@ -56,7 +56,7 @@ export default function Game({ room, playerId, round, result, onLeave }: Props) 
   const [smokeFrom, setSmokeFrom] = useState('');
   const [spyCounts, setSpyCounts] = useState<number[] | null>(null);
   // A short-lived confirmation banner shown when this player fires a power-up.
-  const [flash, setFlash] = useState<{ icon: string; text: string } | null>(null);
+  const [flash, setFlash] = useState<{ icon: string; text: string; error?: boolean; id: number } | null>(null);
   const flashTimer = useRef<number | null>(null);
   const confettiFired = useRef<string | null>(null);
   // Tracks the last whole second we played a countdown tick for, so each of the
@@ -200,16 +200,19 @@ export default function Game({ room, playerId, round, result, onLeave }: Props) 
     socket.emit(
       'powerup:use',
       { type },
-      (res: { ok: boolean; type?: string; hiddenIndices?: number[]; newEndsAt?: number; optionCounts?: number[] }) => {
-        if (!res?.ok) return;
+      (res: { ok: boolean; type?: string; error?: string; hiddenIndices?: number[]; newEndsAt?: number; optionCounts?: number[] }) => {
+        if (flashTimer.current) window.clearTimeout(flashTimer.current);
+        flashTimer.current = window.setTimeout(() => setFlash(null), 2600);
+        if (!res?.ok) {
+          play('wrong');
+          setFlash({ icon: '⚠', text: res?.error ?? 'Power-up failed. Try again.', error: true, id: Date.now() });
+          return;
+        }
         setUsed((u) => (u.includes(type) ? u : [...u, type]));
         if (type === 'fifty' && res.hiddenIndices) setHidden(res.hiddenIndices);
         if (type === 'spy' && res.optionCounts) setSpyCounts(res.optionCounts);
         play('powerup');
-        const fb = POWERUP_FLASH[type];
-        setFlash(fb);
-        if (flashTimer.current) window.clearTimeout(flashTimer.current);
-        flashTimer.current = window.setTimeout(() => setFlash(null), 2600);
+        setFlash({ ...POWERUP_FLASH[type], id: Date.now() });
       },
     );
   };
@@ -274,7 +277,12 @@ export default function Game({ room, playerId, round, result, onLeave }: Props) 
         )}
 
         {flash && (
-          <div className="powerup-flash" role="status" aria-live="polite">
+          <div
+            key={flash.id}
+            className={`powerup-flash ${flash.error ? 'error' : ''}`}
+            role={flash.error ? 'alert' : 'status'}
+            aria-live={flash.error ? 'assertive' : 'polite'}
+          >
             <span className="pf-icon">{flash.icon}</span>
             <span className="pf-text">{flash.text}</span>
           </div>
